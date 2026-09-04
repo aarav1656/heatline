@@ -1,39 +1,12 @@
-# Win conditions
+# WIN-CONDITIONS: Order to Correct (WebMCP Challenge, second account)
 
-This repo is not itself a hackathon submission. It is the extracted, domain-stripped spine of
-`out-of-service` (WebMCP Challenge entry, scored 16.9/20 with the judge panel), published as a
-public template so two *other* Devpost entries under different accounts (`docs/NEXT-ENTRIES.md`
-in the `webmcp` project: Order to Correct, Pill Round) can clone it tonight and start from a
-working two-role WebMCP app instead of an empty Next.js project.
-
-- **Scoreboard**: not competing on its own scoreboard. It exists to raise the floor of the two
-  entries that do: both were scoped assuming this fork exists (`docs/NEXT-ENTRIES.md`, "Fork
-  recipe (30 min)").
-- **Bar to beat**: `out-of-service` itself, 16.9/20. The fork must not regress any of the
-  properties that scored it: role-derived capability keys (never a self-declared label),
-  confirm-before-mutate on every write tool, a declarative form with no `toolautosubmit`,
-  server-side role re-checks independent of which tools a session was handed, SSE-shared state,
-  spotlighted free text.
-- **Asset we will own**: the spine itself — `kamalbuilds/webmcp-two-agent-spine`, a public
-  GitHub template repo. The asset is the working code plus the "how to add a domain" README
-  section, not a hosted deployment.
-- **Off-platform buyer**: none; this is infrastructure for two sibling submissions, not a
-  product with its own user.
-- **Single entry**: N/A here. The eligibility risk this repo exists to remove is stated in
-  `docs/NEXT-ENTRIES.md`: one Devpost account per submission, so Order to Correct and Pill Round
-  ship from two different accounts, each forking this repo independently rather than sharing one
-  submission.
-- **Verb the brief names**: "clone it and have a working two-role WebMCP app in minutes."
-- **Our product performs that verb**: `pnpm install && pnpm dev` boots a case page where an
-  owner and a partner, in two browser tabs, each get an asymmetric WebMCP tool set, propose and
-  confirm a change, and see it land over SSE, with zero domain code written yet.
-- **Metric plan**: `npx tsc --noEmit`, `npx vitest run` (evals + store + webmcp lifecycle
-  suites), and `pnpm build` all pass clean before this is pushed; that is the fork-readiness bar.
-- **Live by**: tonight (2026-09-03 close window per `docs/NEXT-ENTRIES.md`), so the two forking
-  entries have time left to build their own domain on top of it.
-- **Deviation from research**: `docs/NEXT-ENTRIES.md`'s fork recipe says "delete data/ and
-  src/lib/index, src/lib/route, src/lib/live, keep src/lib/store... DESIGN.md, globals.css" — this
-  repo does exactly that, plus generalises the domain nouns (trip/rider/companion to
-  case/owner/partner) and the tool set (route/elevator tools to a generic
-  item/propose/accept/note/report set) so a fork does not have to un-rename transit vocabulary
-  before writing its own.
+Scoreboard: 94 entrant repos + 10 showcase apps indexed in ../../../research/scoreboard.md; civic/legal-record lane (gap #2) has zero entries; nearest: PaperBridge and formwork (generic form filling, no dataset), mend (crisis narrative, no dataset). Out of Service (our first entry) holds the transit lane; no overlap.
+Bar to beat: 15 load-bearing tools with visible UI side effects, live URL, agent tool call on camera in the first 12 s, OSS licence; judge-persona composite of our first entry 16.9/20.
+Asset we will own: per-building NYC housing enforcement index from HPD violations https://data.cityofnewyork.us/resource/wvxf-dwi5.json (verified 200 on 2026-09-03), HPD complaints https://data.cityofnewyork.us/resource/uwyv-629c.json, complaint problems https://data.cityofnewyork.us/resource/a2nx-4u46.json, 311 heat/hot water https://data.cityofnewyork.us/resource/erm2-nwe9.json, registrations https://data.cityofnewyork.us/resource/tesw-yqqr.json; derived per-BBL: open class C count, days open, repeat heat complaints per winter, owner portfolio size; six-row condition-to-code map (27-2029 heat, 27-2031 hot water, mold, pests, lead, gas); SODA query string stored beside every number. Obtained by SODA pulls at build time, committed as JSON.
+Off-platform buyer: a renter in a NYC walk-up whose apartment held 52F at 7am for eleven mornings and whose landlord stopped answering in January, and the tenant-side legal-aid advocate on the case.
+Single entry: Order to Correct
+Verb the brief names: "humans and agents can interact, collaborate, and create together"; "what people and agents can now do together that was difficult or impossible before"
+Our product performs that verb: yes. Tenant session registers log_condition, draft_311_complaint (declarative), file_packet; advocate session registers assemble_hp_action_packet, request_evidence, and never file_packet or log_condition. Code path: capability key per link -> server derives role -> registerTool set per role -> confirm-before-mutate inside file_packet execute -> shared case state over SSE. Verifiable in DevTools > Application > WebMCP in both windows.
+Metric plan: index covers the demo building's BBL with >= 5 open violations by build hour 2; >= 10 expectedCall eval fixtures green; both windows show different tool lists on camera; tests can fail (role denial asserted red then green). Checked in the repo test output and on the live URL.
+Live by: 2026-09-04 06:00 UTC, 2 h before the 08:00 UTC close.
+Deviation from research: single-party in ideas_B, rescoped to tenant + advocate per critic.md ruling 2 (two humans, two agents, no cross-origin). Multiple accounts by one person is a rules risk, stated in NEXT-ENTRIES.md; a different person must own the account.
