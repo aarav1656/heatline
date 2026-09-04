@@ -1,10 +1,10 @@
 1
-00:00:00,000 --> 00:00:04,458
+00:00:00,000 --> 00:00:04,534
 Then it assembles the packet: parties from
 the registration, conditions with their
 
 2
-00:00:04,458 --> 00:00:08,427
+00:00:04,534 --> 00:00:08,570
 code sections, the building record, the
 timeline, relief sought. Confirm.
 

@@ -1,10 +1,10 @@
 1
-00:00:00,000 --> 00:00:04,594
-Order to Correct is a shared case page for
-a tenant and a legal aid advocate. Each of
+00:00:00,000 --> 00:00:03,885
+Heatline is a shared case page for a
+tenant and a legal aid advocate. Each of
 
 2
-00:00:04,594 --> 00:00:08,161
+00:00:03,885 --> 00:00:07,215
 them gets their own agent, on the same
 page, with different tools.
 

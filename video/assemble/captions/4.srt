@@ -1,14 +1,14 @@
 1
-00:00:00,000 --> 00:00:04,068
+00:00:00,000 --> 00:00:04,052
 The data is New York's own housing
 enforcement record: HPD violations,
 
 2
-00:00:04,068 --> 00:00:08,602
+00:00:04,052 --> 00:00:08,567
 complaints, 311 heat calls, and owner
 registrations, pulled by SODA query with
 
 3
-00:00:08,602 --> 00:00:10,868
+00:00:08,567 --> 00:00:10,824
 the exact URL kept beside every number.
 

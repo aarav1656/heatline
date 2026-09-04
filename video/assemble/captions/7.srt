@@ -1,15 +1,15 @@
 1
-00:00:00,000 --> 00:00:05,573
+00:00:00,000 --> 00:00:05,190
 Now the advocate's window, same case. Nine
 tools. Assemble HP action packet and
 
 2
-00:00:05,573 --> 00:00:11,429
+00:00:05,190 --> 00:00:10,643
 request evidence are here. File packet and
 log condition are not. The server checks
 
 3
-00:00:11,429 --> 00:00:15,591
+00:00:10,643 --> 00:00:14,519
 the same thing on every write, so a forged
 call gets a 403.
 

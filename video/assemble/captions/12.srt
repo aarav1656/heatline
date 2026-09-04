@@ -1,14 +1,14 @@
 1
-00:00:00,000 --> 00:00:04,693
+00:00:00,000 --> 00:00:04,084
 No chatbot wrapper can do this, because
 nothing else knows which window is asking.
 
 2
-00:00:04,693 --> 00:00:09,500
+00:00:04,084 --> 00:00:08,267
 The page declares its own tools, the roles
 are capability keys, and every write goes
 
 3
-00:00:09,500 --> 00:00:10,473
+00:00:08,267 --> 00:00:09,114
 through a person.
 

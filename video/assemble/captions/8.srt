@@ -1,9 +1,9 @@
 1
-00:00:00,000 --> 00:00:04,507
+00:00:00,000 --> 00:00:04,406
 The advocate's agent asks the tenant for a
 photo of the thermostat. It lands in the
 
 2
-00:00:04,507 --> 00:00:06,299
+00:00:04,406 --> 00:00:06,157
 tenant's window without a reload.
 
