@@ -95,7 +95,7 @@ export function Report311Form({ actions }: { actions: CaseActions }) {
     >
       <div className="flex items-baseline justify-between gap-2">
         <h2 className="colhead">311 complaint</h2>
-        <span className="bg-accent-soft px-2 py-0.5 text-[0.625rem] font-semibold uppercase tracking-[0.1em] text-accent">
+        <span className="border border-sim px-2 py-0.5 text-[0.625rem] font-semibold uppercase tracking-[0.1em] text-sim">
           Simulated
         </span>
       </div>
@@ -107,7 +107,7 @@ export function Report311Form({ actions }: { actions: CaseActions }) {
           required
           defaultValue={CONDITION_TYPES[0].value}
           toolparamdescription="The kind of condition this complaint is about."
-          className="mt-1 block w-full rounded-control border border-hair-strong bg-paper px-2.5 py-2 text-[0.9375rem] font-normal focus:border-accent"
+          className="mt-1 block w-full border border-hair-strong bg-paper px-2.5 py-2 text-[0.9375rem] font-normal focus:border-accent"
         >
           {CONDITION_TYPES.map((c) => (
             <option key={c.value} value={c.value}>
@@ -125,13 +125,13 @@ export function Report311Form({ actions }: { actions: CaseActions }) {
           rows={3}
           toolparamdescription="What happened, in the tenant's own words."
           placeholder="No heat since Monday morning, apartment reads 58F…"
-          className="mt-1 block w-full rounded-control border border-hair-strong bg-paper px-2.5 py-2 text-[0.9375rem] font-normal focus:border-accent"
+          className="mt-1 block w-full border border-hair-strong bg-paper px-2.5 py-2 text-[0.9375rem] font-normal focus:border-accent"
         />
       </label>
 
       <button
         type="submit"
-        className={`${styles.submit} mt-4 w-full rounded-control bg-accent px-4 py-2.5 text-[0.9375rem] font-semibold text-paper transition-transform duration-150 active:scale-[0.97]`}
+        className={`${styles.submit} mt-4 w-full bg-accent px-4 py-2.5 text-[0.9375rem] font-semibold text-paper transition-transform duration-150 active:scale-[0.97]`}
       >
         Send to 311 (simulated)
       </button>

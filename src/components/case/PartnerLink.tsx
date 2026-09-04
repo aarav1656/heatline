@@ -9,9 +9,9 @@ export function PartnerLink({ caseId, partnerKey }: { caseId: string; partnerKey
 
   if (!partnerKey) {
     return (
-      <section className="border border-hair-strong bg-paper">
-        <h2 className="colhead border-b border-hair bg-paper-sunk px-3 py-1.5">advocate link</h2>
-        <p className="px-3 py-2.5 text-[0.75rem] leading-snug text-ink-soft">
+      <section className="border-t border-ink">
+        <h2 className="colhead py-2">Advocate link</h2>
+        <p className="py-2.5 text-[0.75rem] leading-snug text-body">
           The advocate key for this case is not available in this session.
         </p>
       </section>
@@ -22,10 +22,10 @@ export function PartnerLink({ caseId, partnerKey }: { caseId: string; partnerKey
   const href = typeof window === "undefined" ? path : `${window.location.origin}${path}`;
 
   return (
-    <section className="border border-hair-strong bg-paper">
-      <h2 className="colhead border-b border-hair bg-paper-sunk px-3 py-1.5">advocate link</h2>
-      <div className="flex flex-wrap items-center gap-2 px-3 py-2.5">
-        <code className="code min-w-0 flex-1 break-all text-[0.6875rem] text-ink-soft">{href}</code>
+    <section className="border-t border-ink">
+      <h2 className="colhead py-2">Advocate link</h2>
+      <div className="flex flex-wrap items-center gap-2 py-2.5">
+        <code className="code min-w-0 flex-1 break-all text-[0.6875rem] text-body">{href}</code>
         <Button
           type="button"
           onClick={async () => {
@@ -42,12 +42,12 @@ export function PartnerLink({ caseId, partnerKey }: { caseId: string; partnerKey
         </Button>
         <a
           href={path}
-          className="inline-flex items-center rounded-control border border-hair-strong bg-paper px-3.5 py-2 text-[0.8125rem] font-semibold transition-colors duration-150 hover:border-ink"
+          className="inline-flex items-center border border-hair-strong bg-paper px-3.5 py-2 text-[0.8125rem] font-semibold transition-colors duration-150 hover:border-ink"
         >
           Open
         </a>
       </div>
-      <p className="border-t border-hair px-3 py-2 text-[0.75rem] leading-snug text-ink-soft">
+      <p className="border-t border-hair py-2 text-[0.75rem] leading-snug text-body">
         Whoever opens this gets the advocate session. Their agent can assemble the HP Action
         packet and request evidence; the file_packet and log_condition tools are never registered
         in that window, and the server rejects those actions from an advocate even if forged.

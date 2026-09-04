@@ -1,55 +1,59 @@
 @import "tailwindcss";
 
 /*
- * Order to Correct reads as a housing court docket / HPD notice register on paper, not as a
- * dashboard. Every colour here is a meaning: a violation class, a source citation, or the fact
- * that a packet has been filed. Nothing is decoration.
+ * Order to Correct reads as a legal docket printed by a broadsheet, not a dashboard. Every
+ * colour here is a meaning: a violation class, a source citation, or the fact that a packet
+ * has been filed. Nothing is decoration.
  *
  * Tokens live in one @theme block. Components reference the semantic name
- * (bg-paper, text-ink, border-hair, text-tier-out), never a raw hex.
+ * (bg-paper, text-ink, border-hair, text-tier-out), never a raw hex. Names are kept from the
+ * prior revision where they still hold true on white (paper is now literal white paper,
+ * paper-sunk is the off-white sectioning tint); ink-soft/ink-subtle are renamed to body since
+ * "ink" no longer describes a muted gray on pure black ink.
  */
 
 @theme {
   /* Type. next/font binds the real families on <html>; see the html rule below. */
   --font-sans: ui-sans-serif, system-ui, "Helvetica Neue", Arial, sans-serif;
   --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --font-display: Georgia, "Times New Roman", serif;
 
-  /* Surface: warm off-white case-record paper, near-black ink. Never #fff, never #000. */
-  --color-paper: #f2efe9;
-  --color-paper-sunk: #ece8dc;
-  --color-paper-inset: #e4dfce;
-  --color-ink: #0a0a0a;
-  --color-ink-soft: #4a4a46;
-  --color-ink-subtle: #7a776d;
-  --color-hair: #ddd8c8;
-  --color-hair-strong: #b8b29c;
+  /* Surface: pure white broadsheet canvas, pure black ink. */
+  --color-paper: #ffffff;
+  --color-paper-sunk: #f5f5f5;
+  --color-ink: #000000;
+  --color-ink-soft: #1a1a1a;
+  --color-body: #757575;
+  --color-hair: #e0e0e0;
+  --color-hair-strong: #b3b3b3;
 
-  /* One accent: civic red-brown, the colour of a filing seal. Interactive only, never body text. */
-  --color-accent: #8b2500;
-  --color-accent-soft: #f1dcd3;
-  --color-accent-ink: #6b1c00;
+  /* One accent: civic red, the colour of a filing seal. Interactive only, never body text. */
+  --color-accent: #b91c1c;
+  --color-accent-soft: #fbe4e4;
+  --color-accent-ink: #7f1414;
 
-  /* Violation-class tiers, all AA on the surface (see DESIGN.md contrast table). */
-  --color-tier-reliable: #0c6b3d;
-  --color-tier-watch: #8a5a00;
-  --color-tier-out: #7a1010;
+  /* Violation-class tiers, all AA on the canvas (see DESIGN.md contrast table). */
+  --color-tier-reliable: #166534;
+  --color-tier-watch: #92400e;
+  --color-tier-out: #991b1b;
 
   /* A simulated demo control is never mistaken for a real one. */
   --color-sim: #6c2bd9;
 
-  /* Square corners on panels and chips; 2px only on things you type in or press. */
+  /* Square corners everywhere: docket controls are not pill-pressable. */
   --radius-plate: 0px;
-  --radius-control: 2px;
+  --radius-control: 0px;
 }
 
 /*
- * next/font defines --font-archivo / --font-plex-mono on the element carrying its
- * className, which is <html>. Binding --font-sans here rather than in :root is the
- * difference between Archivo and a silent serif fallback.
+ * next/font defines --font-bodoni / --font-inter / --font-plex-mono on the element carrying
+ * its className, which is <html>. Binding --font-sans/--font-display here rather than in
+ * :root is the difference between the real families and a silent fallback.
  */
 html {
-  --font-sans: var(--font-archivo), ui-sans-serif, system-ui, Arial, sans-serif;
+  --font-sans: var(--font-plex-sans), ui-sans-serif, system-ui, Arial, sans-serif;
   --font-mono: var(--font-plex-mono), ui-monospace, Menlo, Consolas, monospace;
+  --font-display: var(--font-bodoni), "Playfair Display", "Times New Roman", Georgia, serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -68,29 +72,29 @@ body {
     font-feature-settings: "tnum" 1;
   }
 
-  /* Case titles and addresses: the condensed, tight setting of a docket header. */
+  /* Case titles and addresses: the tall condensed serif of a broadsheet headline. */
   .plate {
-    font-stretch: 88%;
+    font-family: var(--font-display);
     letter-spacing: -0.02em;
-    font-weight: 650;
-    line-height: 1.02;
+    font-weight: 700;
+    line-height: 1.04;
   }
 
-  /* Case ids, code sections and timestamps: a filed-notice stamp, not body copy. */
+  /* Case ids, code sections and timestamps: a dateline stamp, not body copy. */
   .code {
     font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;
-    letter-spacing: 0.01em;
+    letter-spacing: 0.02em;
   }
 
-  /* A column heading on a register page. Used sparingly, never stacked on an h2. */
+  /* A numbered packet section heading, or a column heading on a register page. */
   .colhead {
     font-size: 0.6875rem;
     font-weight: 600;
     line-height: 1.2;
     letter-spacing: 0.13em;
     text-transform: uppercase;
-    color: var(--color-ink-soft);
+    color: var(--color-ink);
   }
 
   :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
