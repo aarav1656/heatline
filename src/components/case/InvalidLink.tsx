@@ -5,13 +5,15 @@
  */
 export function InvalidLink() {
   return (
-    <div className="mx-auto flex min-h-[60vh] w-full max-w-[560px] flex-col items-center justify-center gap-3 px-4 text-center">
-      <p className="colhead text-tier-out">invalid link</p>
-      <h1 className="plate text-[1.5rem]">This link is not valid</h1>
-      <p className="max-w-sm text-[0.875rem] leading-snug text-ink-soft">
-        The key in this URL does not match either the tenant or the advocate link for this case.
-        Use the exact URL you were given, not a guessed or edited one.
-      </p>
+    <div className="mx-auto flex min-h-[60vh] w-full max-w-[560px] items-center justify-center px-4">
+      <div className="flex flex-col items-center gap-3 border-2 border-ink px-6 py-8 text-center">
+        <p className="colhead text-tier-out">invalid link</p>
+        <h1 className="plate text-[1.75rem]">This link is not valid</h1>
+        <p className="max-w-sm text-[0.875rem] leading-snug text-body">
+          The key in this URL does not match either the tenant or the advocate link for this
+          case. Use the exact URL you were given, not a guessed or edited one.
+        </p>
+      </div>
     </div>
   );
 }

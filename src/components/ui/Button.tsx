@@ -4,15 +4,13 @@ type Variant = "primary" | "solid" | "outline" | "danger";
 
 /**
  * Docket buttons: a rectangular plate with a hairline, no gradient, no shadow.
- * `primary` is the one accent (civic red-brown). `solid` is ink, for the destructive-free
+ * `primary` is the one accent (civic red). `solid` is ink, for the destructive-free
  * commitments the tenant makes. Press is a 3% squeeze, nothing else moves.
  */
 const VARIANTS: Record<Variant, string> = {
-  primary:
-    "bg-accent text-paper border-accent hover:bg-accent-ink hover:border-accent-ink",
+  primary: "bg-accent text-paper border-accent hover:bg-accent-ink hover:border-accent-ink",
   solid: "bg-ink text-paper border-ink hover:bg-ink-soft hover:border-ink-soft",
-  outline:
-    "bg-paper text-ink border-hair-strong hover:border-ink hover:bg-paper-sunk",
+  outline: "bg-paper text-ink border-hair-strong hover:border-ink hover:bg-paper-sunk",
   danger:
     "bg-paper text-tier-out border-hair-strong hover:border-tier-out hover:bg-tier-out hover:text-paper",
 };
@@ -25,7 +23,7 @@ export function Button({
   return (
     <button
       {...rest}
-      className={`inline-flex items-center justify-center rounded-control border px-3.5 py-2 text-[0.8125rem] font-semibold tracking-[0.01em] transition-[background-color,border-color,color,transform] duration-150 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:active:scale-100 ${VARIANTS[variant]} ${className}`}
+      className={`inline-flex items-center justify-center border px-3.5 py-2 text-[0.8125rem] font-semibold uppercase tracking-[0.06em] transition-[background-color,border-color,color,transform] duration-150 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:active:scale-100 ${VARIANTS[variant]} ${className}`}
     />
   );
 }

@@ -40,8 +40,8 @@ function Card({ pending, depth }: { pending: PendingConfirm; depth: number }) {
       aria-label={pending.title}
       className="fixed inset-x-0 bottom-0 z-50 flex justify-center p-4 sm:p-6"
     >
-      <div className="w-full max-w-xl border border-hair-strong bg-paper text-ink">
-        <div className="flex items-baseline justify-between gap-4 border-b border-hair-strong bg-ink px-4 py-2 text-paper">
+      <div className="w-full max-w-xl border-2 border-ink bg-paper text-ink">
+        <div className="flex items-baseline justify-between gap-4 border-b-2 border-ink bg-ink px-4 py-2 text-paper">
           <span className="colhead text-paper">agent wants to act</span>
           {depth > 0 && (
             <span className="code num text-[0.6875rem] text-paper/70">{depth} more waiting</span>
@@ -71,7 +71,7 @@ function Card({ pending, depth }: { pending: PendingConfirm; depth: number }) {
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 placeholder="that transfer is too long for me…"
-                className="mt-1 w-full rounded-control border border-hair-strong bg-paper px-2.5 py-2 text-[0.9375rem] focus:border-accent"
+                className="mt-1 w-full border border-hair-strong bg-paper px-2.5 py-2 text-[0.9375rem] focus:border-accent"
                 onKeyDown={(e) => {
                   if (e.key === "Enter") pending.reject(reason);
                 }}
@@ -80,18 +80,18 @@ function Card({ pending, depth }: { pending: PendingConfirm; depth: number }) {
           )}
         </div>
 
-        <div className="flex gap-2 border-t border-hair-strong p-3">
+        <div className="flex gap-2 border-t-2 border-ink p-3">
           <button
             type="button"
             onClick={() => pending.resolve()}
-            className="flex-1 rounded-control bg-ink px-4 py-3 text-[0.9375rem] font-semibold uppercase tracking-[0.04em] text-paper transition-transform duration-150 active:scale-[0.97]"
+            className="flex-1 bg-ink px-4 py-3 text-[0.9375rem] font-semibold uppercase tracking-[0.06em] text-paper transition-transform duration-150 active:scale-[0.97]"
           >
             {pending.confirmLabel ?? "Confirm"}
           </button>
           <button
             type="button"
             onClick={() => (rejecting ? pending.reject(reason) : setRejecting(true))}
-            className="flex-1 rounded-control border border-hair-strong px-4 py-3 text-[0.9375rem] font-semibold uppercase tracking-[0.04em] transition-transform duration-150 active:scale-[0.97]"
+            className="flex-1 border border-hair-strong px-4 py-3 text-[0.9375rem] font-semibold uppercase tracking-[0.06em] transition-transform duration-150 active:scale-[0.97]"
           >
             {rejecting ? "Send rejection" : (pending.rejectLabel ?? "Reject")}
           </button>

@@ -161,13 +161,13 @@ export function WebMCPTools({
             <span
               className={`code px-1 py-px text-[0.625rem] uppercase tracking-[0.1em] ${
                 layer === "unavailable"
-                  ? "border border-hair-strong text-ink-soft"
+                  ? "border border-hair-strong text-body"
                   : "bg-accent text-paper"
               }`}
             >
               {layer}
             </span>
-            <span className="num text-ink-soft">
+            <span className="num text-body">
               {role} · {registered.length} tools · gen {generation}
             </span>
           </span>
@@ -183,7 +183,7 @@ export function WebMCPTools({
         )}
 
         {registered.length === 0 && layer !== "unavailable" ? (
-          <p className="px-3 py-2.5 text-[0.8125rem] text-ink-soft">
+          <p className="px-3 py-2.5 text-[0.8125rem] text-body">
             Registering this session&rsquo;s tools…
           </p>
         ) : (
@@ -213,7 +213,7 @@ export function WebMCPTools({
                     />
                   </td>
                   <td className="code py-1 text-[0.75rem]">{t.name}</td>
-                  <td className="py-1 pr-3 text-right text-[0.6875rem] text-ink-soft">
+                  <td className="py-1 pr-3 text-right text-[0.6875rem] text-body">
                     {t.untrusted ? (
                       <span className="mr-2 border border-tier-watch px-1 text-tier-watch">
                         untrusted output
@@ -228,7 +228,7 @@ export function WebMCPTools({
         )}
 
         {browserTools.length > 0 && (
-          <p className="code border-t border-hair px-3 py-1.5 text-[0.6875rem] leading-relaxed text-ink-subtle">
+          <p className="code border-t border-hair px-3 py-1.5 text-[0.6875rem] leading-relaxed text-body">
             document.modelContext.getTools() → {browserTools.join(", ")}
           </p>
         )}
@@ -238,7 +238,7 @@ export function WebMCPTools({
             tool log · <span className="num">{log.length}</span>
           </h3>
           {log.length === 0 ? (
-            <p className="px-3 py-2.5 text-[0.8125rem] text-ink-soft">
+            <p className="px-3 py-2.5 text-[0.8125rem] text-body">
               No tool call has come in yet. Ask the agent to add or propose something and the
               first line lands here.
             </p>

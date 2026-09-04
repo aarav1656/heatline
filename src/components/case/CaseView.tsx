@@ -30,26 +30,30 @@ function StreamDot({ state }: { state: "connecting" | "open" | "closed" }) {
   return (
     <span className="inline-flex items-center gap-1.5 text-[0.6875rem] font-medium">
       <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: colour }} aria-hidden />
-      <span className="text-ink-soft">case {state}</span>
+      <span className="text-body">case {state}</span>
     </span>
   );
 }
 
-/** A panel on the docket: a hairline frame with a stated heading, never a floating card. */
+/** A panel on the docket: a black top rule with a numbered heading, never a floating card. */
 function Panel({
   title,
+  section,
   meta,
   children,
 }: {
   title: string;
+  section: string;
   meta?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
-    <section className="border border-hair-strong bg-paper">
-      <header className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-hair bg-paper-sunk px-3 py-1.5">
-        <h2 className="colhead">{title}</h2>
-        {meta ? <span className="text-[0.6875rem] text-ink-soft">{meta}</span> : null}
+    <section className="border-t border-ink">
+      <header className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-2">
+        <h2 className="colhead">
+          {section}. {title}
+        </h2>
+        {meta ? <span className="text-[0.6875rem] text-body">{meta}</span> : null}
       </header>
       {children}
     </section>
@@ -59,8 +63,8 @@ function Panel({
 function BuildingRecordPanel({ record, bbl }: { record: BuildingRecord | null; bbl: string }) {
   if (!record) {
     return (
-      <Panel title="Building record">
-        <p className="px-3 py-3 text-[0.875rem] text-ink-soft">
+      <Panel title="Building record" section="I">
+        <p className="py-3 text-[0.875rem] text-body">
           No building record for BBL {bbl} yet. The index has not covered this building.
         </p>
       </Panel>
@@ -68,22 +72,22 @@ function BuildingRecordPanel({ record, bbl }: { record: BuildingRecord | null; b
   }
   const { building, openClassC, openClassB, openClassA, oldestOpenDays, source } = record;
   return (
-    <Panel title="Building record">
+    <Panel title="Building record" section="I">
       <div className="grid grid-cols-3 gap-px border-b border-hair bg-hair">
-        <div className="bg-paper px-3 py-2.5">
+        <div className="bg-paper py-2.5">
           <p className="colhead">Class C, out</p>
-          <p className="num text-tier-out text-[1.5rem] font-bold">{openClassC}</p>
+          <p className="plate num text-tier-out text-[2.5rem]">{openClassC}</p>
         </div>
-        <div className="bg-paper px-3 py-2.5">
+        <div className="bg-paper py-2.5">
           <p className="colhead">Class B, watch</p>
-          <p className="num text-tier-watch text-[1.5rem] font-bold">{openClassB}</p>
+          <p className="plate num text-tier-watch text-[2.5rem]">{openClassB}</p>
         </div>
-        <div className="bg-paper px-3 py-2.5">
+        <div className="bg-paper py-2.5">
           <p className="colhead">Class A, reliable</p>
-          <p className="num text-tier-reliable text-[1.5rem] font-bold">{openClassA}</p>
+          <p className="plate num text-tier-reliable text-[2.5rem]">{openClassA}</p>
         </div>
       </div>
-      <div className="border-b border-hair px-3 py-2.5 text-[0.8125rem]">
+      <div className="border-b border-hair py-2.5 text-[0.8125rem]">
         Oldest open violation: <span className="num font-semibold">{oldestOpenDays}</span> days.
         {building.registration ? (
           <>
@@ -94,7 +98,7 @@ function BuildingRecordPanel({ record, bbl }: { record: BuildingRecord | null; b
           </>
         ) : null}
       </div>
-      <div className="px-3 py-2 text-[0.75rem] text-ink-soft">
+      <div className="py-2 text-[0.75rem] text-body">
         <SourceNote dataset={source.dataset} query={source.query} rows={source.rows}>
           HPD violation source
         </SourceNote>
@@ -152,11 +156,11 @@ export function CaseView() {
     <div>
       {/* The two roles must be unmistakable from across a room, not from a label. */}
       {role === "partner" ? (
-        <div className="border-b border-ink bg-ink text-paper" data-testid="role-banner">
-          <div className="mx-auto flex w-full max-w-[1360px] flex-wrap items-baseline justify-between gap-x-8 gap-y-2 px-4 py-4 sm:px-8">
+        <div className="border-b-2 border-ink bg-ink text-paper" data-testid="role-banner">
+          <div className="mx-auto flex w-full max-w-[1360px] flex-wrap items-baseline justify-between gap-x-8 gap-y-2 px-4 py-6 sm:px-8">
             <div>
-              <h1 className="plate text-[1.5rem] sm:text-[1.875rem]">You are the advocate</h1>
-              <p className="plate mt-1 text-[1.0625rem] text-paper/80">{caseState.title}</p>
+              <p className="colhead text-paper/70">You are the advocate</p>
+              <h1 className="plate mt-1 text-[1.75rem] sm:text-[2.25rem]">{caseState.title}</h1>
             </div>
             <p className="max-w-sm text-[0.8125rem] leading-snug text-paper/75">
               You can assemble the HP Action packet and request evidence. The file_packet and
@@ -174,7 +178,7 @@ export function CaseView() {
           </Link>
           <div className="flex flex-wrap items-center gap-4">
             <StreamDot state={stream} />
-            <span className="code num text-[0.6875rem] text-ink-subtle">v{caseState.version}</span>
+            <span className="code num text-[0.6875rem] text-body">v{caseState.version}</span>
           </div>
         </header>
 
@@ -182,10 +186,11 @@ export function CaseView() {
           <div className="border-b border-hair py-4" data-testid="role-banner">
             <p className="colhead">You are the tenant</p>
             <h1 className="plate mt-1.5 text-[clamp(1.5rem,3.6vw,2.25rem)] text-balance">{caseState.title}</h1>
-            <p className="mt-1.5 max-w-xl text-[0.8125rem] leading-snug text-ink-soft">
+            <p className="mt-1.5 max-w-xl text-[0.8125rem] leading-snug text-body">
               You log conditions, answer evidence requests, draft the 311 complaint and file the
               HP Action packet. Your advocate assembles the packet and requests evidence; they
-              cannot file it. Nothing here is legal advice, it is for review with your advocate.
+              cannot file it. Everything here is for review with your advocate, not a substitute
+              for one.
             </p>
           </div>
         ) : null}
@@ -194,7 +199,7 @@ export function CaseView() {
           <p
             role="alert"
             aria-live="polite"
-            className="mt-3 border border-tier-out bg-paper-sunk px-3 py-2 text-[0.8125rem] font-medium text-tier-out"
+            className="mt-3 border-2 border-tier-out px-3 py-2 text-[0.8125rem] font-medium text-tier-out"
           >
             {error}
           </p>
@@ -204,8 +209,8 @@ export function CaseView() {
           {/* ------------------------------- left column ------------------------------- */}
           <section aria-label="Case detail" className="flex flex-col gap-5">
             {recordLoading ? (
-              <Panel title="Building record">
-                <p className="px-3 py-3 text-[0.875rem] text-ink-soft">Loading…</p>
+              <Panel title="Building record" section="I">
+                <p className="py-3 text-[0.875rem] text-body">Loading…</p>
               </Panel>
             ) : (
               <BuildingRecordPanel record={record} bbl={caseState.bbl} />
@@ -214,16 +219,17 @@ export function CaseView() {
             {/* --------------------------- conditions log --------------------------- */}
             <Panel
               title="Conditions log"
+              section="II"
               meta={<span className="num">{caseState.conditions.length} entries</span>}
             >
               {caseState.conditions.length === 0 ? (
-                <p className="px-3 py-3 text-[0.875rem] text-ink-soft">
+                <p className="py-3 text-[0.875rem] text-body">
                   No conditions logged yet. Log the first one below or tell your agent.
                 </p>
               ) : (
                 <ol>
                   {caseState.conditions.map((c) => (
-                    <li key={c.id} className="border-b border-hair px-3 py-2.5 last:border-b-0" data-testid={`condition-${c.id}`}>
+                    <li key={c.id} className="border-b border-hair py-2.5 last:border-b-0" data-testid={`condition-${c.id}`}>
                       <div className="flex flex-wrap items-baseline justify-between gap-2">
                         <span className="plate text-[0.9375rem]">
                           {c.type}
@@ -235,7 +241,7 @@ export function CaseView() {
                               {c.codeSection}
                             </span>
                           ) : null}
-                          <time className="code num text-[0.6875rem] text-ink-subtle" dateTime={c.at}>
+                          <time className="code num text-[0.6875rem] text-body" dateTime={c.at}>
                             {new Date(c.at).toLocaleDateString("en-US")}
                           </time>
                         </div>
@@ -247,7 +253,7 @@ export function CaseView() {
               )}
               {role === "owner" ? (
                 <form
-                  className="flex flex-col gap-2 border-t border-hair px-3 py-2.5"
+                  className="flex flex-col gap-2 border-t border-hair py-2.5"
                   onSubmit={(e) => {
                     e.preventDefault();
                     if (!conditionNote.trim()) return;
@@ -264,7 +270,7 @@ export function CaseView() {
                       value={conditionType}
                       onChange={(e) => setConditionType(e.target.value)}
                       aria-label="Condition type"
-                      className="rounded-control border border-hair-strong bg-paper px-2.5 py-2 text-[0.8125rem] focus:border-accent"
+                      className="border border-hair-strong bg-paper px-2.5 py-2 text-[0.8125rem] focus:border-accent"
                     >
                       {CONDITION_TYPES.map((c) => (
                         <option key={c.value} value={c.value}>
@@ -277,7 +283,7 @@ export function CaseView() {
                       onChange={(e) => setReading(e.target.value)}
                       placeholder="Reading, e.g. 58F…"
                       aria-label="Reading, optional"
-                      className="num flex-1 rounded-control border border-hair-strong bg-paper px-2.5 py-2 text-[0.8125rem] focus:border-accent"
+                      className="num flex-1 border border-hair-strong bg-paper px-2.5 py-2 text-[0.8125rem] focus:border-accent"
                     />
                   </div>
                   <div className="flex gap-2">
@@ -286,7 +292,7 @@ export function CaseView() {
                       onChange={(e) => setConditionNote(e.target.value)}
                       placeholder="What happened…"
                       aria-label="Describe what happened"
-                      className="flex-1 rounded-control border border-hair-strong bg-paper px-2.5 py-2 text-[0.875rem] focus:border-accent"
+                      className="flex-1 border border-hair-strong bg-paper px-2.5 py-2 text-[0.875rem] focus:border-accent"
                       data-testid="condition-note-input"
                     />
                     <Button type="submit" variant="primary" disabled={busy !== null || !conditionNote.trim()}>
@@ -300,23 +306,24 @@ export function CaseView() {
             {/* --------------------------- evidence requests --------------------------- */}
             <Panel
               title="Evidence requests"
+              section="III"
               meta={<span className="num">{open.length} open</span>}
             >
               {caseState.evidenceRequests.length === 0 ? (
-                <p className="px-3 py-3 text-[0.875rem] text-ink-soft">
+                <p className="py-3 text-[0.875rem] text-body">
                   No evidence requested yet. The advocate asks for what they need to build the
                   packet.
                 </p>
               ) : (
                 <ol>
                   {caseState.evidenceRequests.map((r) => (
-                    <li key={r.id} className="border-b border-hair px-3 py-2.5 last:border-b-0" data-testid={`evidence-${r.id}`}>
+                    <li key={r.id} className="border-b border-hair py-2.5 last:border-b-0" data-testid={`evidence-${r.id}`}>
                       <div className="flex flex-wrap items-baseline justify-between gap-2">
                         <p className="text-[0.875rem]">{r.ask}</p>
                         <span className="colhead">{r.status}</span>
                       </div>
                       {r.answer ? (
-                        <p className="mt-1 border-t border-hair pt-1 text-[0.8125rem] text-ink-soft">
+                        <p className="mt-1 border-t border-hair pt-1 text-[0.8125rem] text-body">
                           Answer: {r.answer}
                         </p>
                       ) : role === "owner" ? (
@@ -332,7 +339,7 @@ export function CaseView() {
               )}
               {role === "partner" ? (
                 <form
-                  className="flex gap-2 border-t border-hair px-3 py-2.5"
+                  className="flex gap-2 border-t border-hair py-2.5"
                   onSubmit={(e) => {
                     e.preventDefault();
                     if (!evidenceAsk.trim()) return;
@@ -346,7 +353,7 @@ export function CaseView() {
                     onChange={(e) => setEvidenceAsk(e.target.value)}
                     placeholder="Ask for a photo, a reading…"
                     aria-label="Ask the tenant for evidence"
-                    className="flex-1 rounded-control border border-hair-strong bg-paper px-2.5 py-2 text-[0.875rem] focus:border-accent"
+                    className="flex-1 border border-hair-strong bg-paper px-2.5 py-2 text-[0.875rem] focus:border-accent"
                     data-testid="evidence-ask-input"
                   />
                   <Button type="submit" disabled={busy !== null || !evidenceAsk.trim()}>
@@ -359,6 +366,7 @@ export function CaseView() {
             {/* --------------------------- HP Action packet --------------------------- */}
             <Panel
               title="HP Action packet"
+              section="IV"
               meta={
                 <span>
                   {filedPackets.length > 0 ? (
@@ -366,13 +374,13 @@ export function CaseView() {
                   ) : draftPackets.length > 0 ? (
                     <span className="text-tier-watch font-semibold">Draft</span>
                   ) : (
-                    <span className="text-ink-soft">None yet</span>
+                    <span className="text-body">None yet</span>
                   )}
                 </span>
               }
             >
               {caseState.packets.length === 0 ? (
-                <div className="px-3 py-3 text-[0.875rem] text-ink-soft">
+                <div className="py-3 text-[0.875rem] text-body">
                   No packet assembled yet.{" "}
                   {role === "partner"
                     ? "Assemble one from your agent when there is enough logged."
@@ -385,7 +393,7 @@ export function CaseView() {
                       <span className="colhead">
                         {p.status === "filed" ? "Filed" : "Draft"} · {p.sections.length} sections
                       </span>
-                      <time className="code num text-[0.6875rem] text-ink-subtle" dateTime={p.filedAt ?? p.createdAt}>
+                      <time className="code num text-[0.6875rem] text-body" dateTime={p.filedAt ?? p.createdAt}>
                         {new Date(p.filedAt ?? p.createdAt).toLocaleString("en-US")}
                       </time>
                     </div>
@@ -422,19 +430,19 @@ export function CaseView() {
 
           {/* -------------------------------- right column -------------------------------- */}
           <section aria-label="Timeline and tools" className="flex flex-col gap-5">
-            <Panel title="Timeline" meta={<span className="num">{caseState.notes.length} entries</span>}>
+            <Panel title="Timeline" section="V" meta={<span className="num">{caseState.notes.length} entries</span>}>
               <ol className="max-h-80 overflow-y-auto" data-testid="timeline">
                 {caseState.notes.length === 0 ? (
-                  <li className="px-3 py-2.5 text-[0.8125rem] text-ink-soft">
+                  <li className="py-2.5 text-[0.8125rem] text-body">
                     Nothing has happened on this case yet.
                   </li>
                 ) : (
                   [...caseState.notes].reverse().map((e, i) => (
                     <li
                       key={`${e.at}-${i}`}
-                      className="grid grid-cols-[4.25rem_1fr] gap-x-3 border-b border-hair px-3 py-2 text-[0.8125rem] last:border-b-0"
+                      className="grid grid-cols-[4.25rem_1fr] gap-x-3 border-b border-hair py-2 text-[0.8125rem] last:border-b-0"
                     >
-                      <time className="code num text-[0.6875rem] text-ink-subtle" dateTime={e.at}>
+                      <time className="code num text-[0.6875rem] text-body" dateTime={e.at}>
                         {new Date(e.at).toLocaleTimeString("en-US", { hour12: false })}
                       </time>
                       <div className="min-w-0">
@@ -446,7 +454,7 @@ export function CaseView() {
                 )}
               </ol>
               <form
-                className="flex gap-2 border-t border-hair px-3 py-2"
+                className="flex gap-2 border-t border-hair py-2"
                 onSubmit={(ev) => {
                   ev.preventDefault();
                   if (!note.trim()) return;
@@ -460,7 +468,7 @@ export function CaseView() {
                   onChange={(e) => setNote(e.target.value)}
                   placeholder="Add a note both windows can read…"
                   aria-label="Add a note to the shared timeline"
-                  className="flex-1 rounded-control border border-hair-strong bg-paper px-2.5 py-1.5 text-[0.8125rem] focus:border-accent"
+                  className="flex-1 border border-hair-strong bg-paper px-2.5 py-1.5 text-[0.8125rem] focus:border-accent"
                   data-testid="note-input"
                 />
                 <Button type="submit" disabled={busy !== null}>
@@ -503,7 +511,7 @@ function EvidenceAnswerForm({
         onChange={(e) => setAnswer(e.target.value)}
         placeholder="Your answer…"
         aria-label={`Answer evidence request ${requestId}`}
-        className="flex-1 rounded-control border border-hair-strong bg-paper px-2.5 py-1.5 text-[0.8125rem] focus:border-accent"
+        className="flex-1 border border-hair-strong bg-paper px-2.5 py-1.5 text-[0.8125rem] focus:border-accent"
       />
       <Button type="submit" disabled={busy !== null || !answer.trim()}>
         {busy === `ev-${requestId}` ? "Sending…" : "Answer"}
