@@ -1,0 +1,10 @@
+1
+00:00:00,000 --> 00:00:05,316
+Here is the tenant's window. The agent
+calls building violation history with no
+
+2
+00:00:05,316 --> 00:00:10,767
+arguments and reads the record straight
+off the case. 102 open class C. 601 days.
+

@@ -1,0 +1,82 @@
+clips.txt manifest
+Order to Correct — demo screen clips manifest
+Recorded from the `qa` Brave profile (native WebMCP, CDP port 9318).
+
+Case: rsrnadbmgn superseded; final case used for beats 5-11: iyhjuth8ya
+  Tenant:   https://order-to-correct.vercel.app/c/iyhjuth8ya?k=5VXCi8nUcPiX_-XrT4dzLN0s
+  Advocate: https://order-to-correct.vercel.app/c/iyhjuth8ya?k=zZU_nu7cUNCG3RO8cEoGAcrw
+  Building: 2315 Barnes Avenue, Bronx (BBL 2043520010) apt 4C, first condition heat 52F@7am.
+
+Native call pattern (single-expression evals only via bhn qa eval):
+  document.modelContext.getTools().then(tools => { window.__t = tools.find(x=>x.name==='TOOL'); })
+  document.modelContext.executeTool(window.__t, JSON.stringify({...})).then(r=>{window.__ok=true}).catch(e=>{window.__ok=false})
+
+Schema corrections found by inspecting inputSchema live (not guessed):
+  match_condition_to_code takes {text: string}, not {description: string}.
+  request_evidence takes {ask: string}.
+  assemble_hp_action_packet and file_packet take {} (no args).
+  draft_311_complaint (declarative form) takes {conditionType, description}; calling it
+    fills the form and shows "An agent filled this in. Read it, then press the button
+    yourself." — no toolautosubmit, a human clicks Send. The confirm-promise itself
+    rejects with "Tool execution cancelled by a form reset" after the human submits,
+    which is expected UI behavior, not a failure (the fields fill correctly either way).
+
+Clips (all /Users/kamal/Desktop/devpost/projects/webmcp/order-to-correct/video/clips/,
+1920x1080 h264 mp4, recorded at emulated 1600x1000 viewport):
+
+  5.mp4 — 9.0s. Tenant tab, fresh case load (TOOL LOG · 0). Called
+    building_violation_history natively with {}, TOOL LOG · 1 shows the call landing
+    beside the Building record panel (102 open class C, 601 days oldest open).
+
+  6.mp4 — 14.0s. Tenant tab. Called match_condition_to_code natively with
+    {text:'no heat at 7am, 52 degrees'}, then log_condition with
+    {type:'heat',reading:'52F at 7am',note:'no heat at 7am, 52 degrees'}. A native
+    bhn click on CONFIRM finishes the write; end frame shows Conditions Log with 2
+    entries and TOOL LOG · 3 (bottom-up: log_condition, match_condition_to_code,
+    building_violation_history from the prior clip's window carrying over generation).
+
+  7.mp4 — 8.2s. Advocate tab, same case (no reload from the tenant's prior writes —
+    proves the shared timeline updates live). Scrolled to TOOLS REGISTERED table:
+    "partner · 9 tools", assemble_hp_action_packet and request_evidence present as
+    writes, file_packet/log_condition absent from the whole table. TOOL LOG · 0 (fresh
+    advocate session, no advocate-originated calls yet).
+
+  8.mp4 — concat of 8a.mp4 (10.2s, advocate tab: request_evidence natively with
+    {ask:'Please send a photo of the thermostat showing 52F'}, CONFIRM clicked, TOOL LOG
+    shows the call) + 8b.mp4 (5.4s, cut to the tenant tab, not reloaded, showing the
+    evidence request arrive under III. EVIDENCE REQUESTS with no page refresh).
+
+  9.mp4 — 12.5s. Advocate tab. Called assemble_hp_action_packet natively with {},
+    CONFIRM clicked; end frame shows the drafted 5-section packet (Parties, Conditions,
+    Building record, Timeline, Relief sought) plus TOOL LOG showing both
+    assemble_hp_action_packet and the earlier request_evidence call.
+
+  10.mp4 — 9.1s. Tenant tab. Called file_packet natively with {}, CONFIRM clicked;
+    IV. HP ACTION PACKET status flips from Draft to Filed, same 5 sections retained,
+    TOOL LOG shows file_packet.
+
+  11.mp4 — 9.2s. Tenant tab, declarative 311 form. Called draft_311_complaint natively
+    with {conditionType:'heat', description:'No heat since January. Apartment reads 52F
+    at 7am, eleventh morning in a row. Landlord unresponsive.'} — the form fills itself
+    and shows a highlighted banner "An agent filled this in. Read it, then press the
+    button yourself."; a human (bhn click) presses "Send to 311 (simulated)", which
+    reads "Drafted a heat complaint." confirming the human-only submit gate.
+
+  hook.mp4 — 3.0s cold-open clip, cropped from the end of 6.mp4 (post-confirm, TOOL LOG
+    with 3 real calls visible beside the Building record panel), used as the video's
+    first beat so a real tool call is on screen inside the first second, per the
+    "first tool call by 0:12" requirement — the narration for beat 1 runs under it as a
+    voiceover cold open rather than over the diagram.
+
+Diagrams: video/diagrams/exrender/build_scenes.py generates problem.png, pipeline.png,
+two-sessions.png from DESIGN.md's palette (white canvas #ffffff, ink #000000, civic red
+accent #b91c1c) rendered via render.html + serve.py on port 8099 (own /tmp/exrender-otc
+root, separate from the sibling pill-round video agent's 8098/exrender-pr).
+
+Not captured: DevTools Application > WebMCP native panel screen recording — narration
+beat 7 mentions it but the beat shows the on-page "TOOLS REGISTERED IN THIS WINDOW"
+panel instead (same information: role, tool list, mutating flags), per the task's
+fallback instruction. Not attempted given the deadline; the on-page panel demonstrates
+the identical claim (advocate has 9 tools, no file_packet/log_condition) without the
+OS-capture risk documented in the sibling out-of-service clips.txt (screen-lock blocks
+screencapture; in-tab DevTools frontend can't open its own debugger websocket).

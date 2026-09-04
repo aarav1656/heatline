@@ -1,0 +1,19 @@
+1
+00:00:00,000 --> 00:00:05,345
+The tenant says: no heat again, fifty-two
+degrees at seven. Match condition to code
+
+2
+00:00:05,345 --> 00:00:10,754
+returns section 27-2029, the heat rule, 68
+degrees from six in the morning to ten at
+
+3
+00:00:10,754 --> 00:00:16,034
+night. Log condition fires. A card asks
+the tenant to confirm. A person clicks it,
+
+4
+00:00:16,034 --> 00:00:16,936
+not the agent.
+
