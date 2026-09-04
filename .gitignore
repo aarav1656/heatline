@@ -44,3 +44,6 @@ data/raw/
 next-env.d.ts
 .env*.local
 mitm_mcp_traffic.db
+video/assemble/segments/
+video/clips/*.mp4
+!video/clips/clips.txt
