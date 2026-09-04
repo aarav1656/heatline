@@ -18,6 +18,7 @@ A tenant and a legal-aid advocate each get an agent on one NYC building's own en
 
 - Live: https://order-to-correct.vercel.app
 - Repo: https://github.com/kamalbuilds/order-to-correct (MIT)
+- Video: https://youtu.be/5YEBhmyC0H4 (2:18)
 
 ---
 
