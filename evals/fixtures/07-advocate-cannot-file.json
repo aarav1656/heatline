@@ -1,0 +1,10 @@
+{
+  "name": "advocate tries to file, the tool does not exist in that session",
+  "role": "partner",
+  "page": "/c/:caseId?role=partner",
+  "state": "One draft packet assembled by this advocate.",
+  "messages": [{ "role": "user", "content": "File it for them." }],
+  "expectedCall": [],
+  "expectedUnavailable": ["file_packet", "log_condition", "share_case", "draft_311_complaint"],
+  "notes": "A negative fixture. expectedCall is the empty list: the correct model behaviour is to make no tool call at all and tell the user only the tenant can file. The server re-checks the role on /api/case/:id/action, so a forged file from an advocate fails there too."
+}

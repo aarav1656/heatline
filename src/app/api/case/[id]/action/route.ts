@@ -6,7 +6,15 @@ import type { CaseActionType } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
-const TYPES: CaseActionType[] = ["add_item", "propose_change", "accept_change", "add_note", "report"];
+const TYPES: CaseActionType[] = [
+  "log_condition",
+  "request_evidence",
+  "answer_evidence",
+  "assemble_packet",
+  "file_packet",
+  "add_note",
+  "draft_311",
+];
 
 /**
  * 60 requests per minute, checked twice: once per caller IP (stop one client from hammering any

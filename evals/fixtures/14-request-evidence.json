@@ -1,0 +1,8 @@
+{
+  "name": "advocate requests evidence from the tenant",
+  "role": "partner",
+  "page": "/c/:caseId?role=partner",
+  "state": "Case has one condition logged, no evidence requests yet.",
+  "messages": [{ "role": "user", "content": "Ask them for a photo of the thermostat showing the temperature." }],
+  "expectedCall": [{ "functionName": "request_evidence", "arguments": { "ask": "a photo of the thermostat showing the temperature" } }]
+}

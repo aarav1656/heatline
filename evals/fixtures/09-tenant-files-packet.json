@@ -1,0 +1,8 @@
+{
+  "name": "tenant files the packet",
+  "role": "owner",
+  "page": "/c/:caseId",
+  "state": "One draft packet assembled by the advocate, ready to file.",
+  "messages": [{ "role": "user", "content": "File the packet." }],
+  "expectedCall": [{ "functionName": "file_packet", "arguments": {} }]
+}

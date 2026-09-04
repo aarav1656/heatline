@@ -1,0 +1,8 @@
+{
+  "name": "advocate pulls the building's violation history",
+  "role": "partner",
+  "page": "/c/:caseId?role=partner",
+  "state": "Case is for BBL 2012345678.",
+  "messages": [{ "role": "user", "content": "How many open violations does this building have?" }],
+  "expectedCall": [{ "functionName": "building_violation_history", "arguments": { "bbl": "2012345678" } }]
+}

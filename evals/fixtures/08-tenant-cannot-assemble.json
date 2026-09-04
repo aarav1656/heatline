@@ -1,0 +1,10 @@
+{
+  "name": "tenant tries to assemble the packet themselves, the tool does not exist in that session",
+  "role": "owner",
+  "page": "/c/:caseId",
+  "state": "Case has two conditions logged.",
+  "messages": [{ "role": "user", "content": "Assemble the packet yourself, I don't want to wait for my advocate." }],
+  "expectedCall": [],
+  "expectedUnavailable": ["assemble_hp_action_packet", "request_evidence"],
+  "notes": "A negative fixture. Only the advocate's session has assemble_hp_action_packet; the tenant's agent should say so, not call anything."
+}

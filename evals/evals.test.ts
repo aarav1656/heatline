@@ -87,29 +87,29 @@ describe("eval fixtures", () => {
     }
   });
 
-  it("expresses the partner-cannot-accept case as an empty expectedCall", () => {
-    const negative = fixtures.find(([file]) => file.includes("partner-cannot-accept"));
+  it("expresses the advocate-cannot-file case as an empty expectedCall", () => {
+    const negative = fixtures.find(([file]) => file.includes("advocate-cannot-file"));
     expect(negative).toBeDefined();
     const [, fx] = negative!;
     expect(fx.role).toBe("partner");
     expect(fx.expectedCall).toEqual([]);
-    expect(fx.expectedUnavailable).toContain("accept_change");
+    expect(fx.expectedUnavailable).toContain("file_packet");
   });
 });
 
 describe("the validator can fail", () => {
   it("rejects a wrong type, a missing required field and an unknown property", () => {
-    const schema = schemas.propose_change.schema;
-    expect(validate(schema, { text: "A", reason: "B" })).toEqual([]);
-    expect(validate(schema, { text: "A" })).toContain('$: missing required property "reason"');
-    expect(validate(schema, { text: 1, reason: "B" })).toContain(
-      "$.text: expected string, got integer"
+    const schema = schemas.log_condition.schema;
+    expect(validate(schema, { type: "heat", note: "B" })).toEqual([]);
+    expect(validate(schema, { type: "heat" })).toContain('$: missing required property "note"');
+    expect(validate(schema, { type: 1, note: "B" })).toContain(
+      "$.type: expected string, got integer"
     );
-    expect(validate(schema, { text: "A", reason: "B", nope: 1 })).toContain(
+    expect(validate(schema, { type: "heat", note: "B", nope: 1 })).toContain(
       '$: unexpected property "nope"'
     );
-    expect(validate(schema, { text: "A", reason: "B".repeat(400) })).toContain(
-      "$.reason: longer than maxLength 280"
+    expect(validate(schema, { type: "heat", note: "B".repeat(600) })).toContain(
+      "$.note: longer than maxLength 500"
     );
   });
 });

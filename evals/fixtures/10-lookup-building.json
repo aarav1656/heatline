@@ -1,0 +1,8 @@
+{
+  "name": "tenant looks up their building by address",
+  "role": "owner",
+  "page": "/c/:caseId",
+  "state": "Case already open for one building.",
+  "messages": [{ "role": "user", "content": "Look up 810 East 178th Street." }],
+  "expectedCall": [{ "functionName": "lookup_building", "arguments": { "query": "810 East 178th Street" } }]
+}

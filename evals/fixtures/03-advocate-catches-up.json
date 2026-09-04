@@ -1,0 +1,8 @@
+{
+  "name": "advocate builds the timeline before answering",
+  "role": "partner",
+  "page": "/c/:caseId?role=partner",
+  "state": "Advocate has just opened the link and knows nothing about the case yet.",
+  "messages": [{ "role": "user", "content": "Catch me up: what's the history on this building and this tenant's conditions?" }],
+  "expectedCall": [{ "functionName": "build_timeline", "arguments": {} }]
+}

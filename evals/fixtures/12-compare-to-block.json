@@ -1,0 +1,8 @@
+{
+  "name": "advocate compares the building to its block",
+  "role": "partner",
+  "page": "/c/:caseId?role=partner",
+  "state": "Case is for BBL 2012345678.",
+  "messages": [{ "role": "user", "content": "Is this building worse than others on the same block?" }],
+  "expectedCall": [{ "functionName": "compare_to_block", "arguments": { "bbl": "2012345678" } }]
+}

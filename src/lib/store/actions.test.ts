@@ -20,84 +20,98 @@ import { applyAction, RoleError } from "@/lib/store/actions";
 import type { CaseState } from "@/lib/types";
 import { GET as getCaseRoute } from "@/app/api/case/[id]/route";
 import { GET as streamRoute } from "@/app/api/case/[id]/stream/route";
-import { getCase as getCaseToolFactory } from "@/lib/webmcp/tools";
+import { listConditions as listConditionsToolFactory } from "@/lib/webmcp/tools";
+
+const TEST_BBL = "2012345678";
 
 async function buildCase(): Promise<CaseState> {
-  return createCase({ title: "Q3 renewal for Acme", firstItem: "Confirm seat count", note: "" });
+  return createCase({
+    bbl: TEST_BBL,
+    apartment: "4B",
+    firstCondition: { type: "heat", reading: "52F", note: "no heat at 7am" },
+  });
 }
 
 describe("role is derived from the capability key, never a self-declared label", () => {
   it("missing key: 403", async () => {
     const caseState = await buildCase();
-    await expect(applyAction(caseState.id, "add_item", "", { text: "x" })).rejects.toBeInstanceOf(RoleError);
+    await expect(applyAction(caseState.id, "log_condition", "", { type: "heat", note: "x" })).rejects.toBeInstanceOf(RoleError);
   });
 
   it("a guessed key that matches neither capability: 403", async () => {
     const caseState = await buildCase();
     await expect(
-      applyAction(caseState.id, "add_item", "totally-guessed-key", { text: "x" }),
+      applyAction(caseState.id, "log_condition", "totally-guessed-key", { type: "heat", note: "x" }),
     ).rejects.toBeInstanceOf(RoleError);
   });
 
-  it("partner key cannot add_item, accept_change or report", async () => {
+  it("advocate (partner) key cannot log_condition, file_packet or draft_311", async () => {
     const caseState = await buildCase();
     await expect(
-      applyAction(caseState.id, "add_item", caseState.partnerKey, { text: "x" }),
+      applyAction(caseState.id, "log_condition", caseState.partnerKey, { type: "heat", note: "x" }),
     ).rejects.toBeInstanceOf(RoleError);
+    await expect(applyAction(caseState.id, "file_packet", caseState.partnerKey, {})).rejects.toBeInstanceOf(RoleError);
     await expect(
-      applyAction(caseState.id, "accept_change", caseState.partnerKey, { proposalId: "p_nope" }),
-    ).rejects.toBeInstanceOf(RoleError);
-    await expect(
-      applyAction(caseState.id, "report", caseState.partnerKey, { subject: "s", description: "d" }),
+      applyAction(caseState.id, "draft_311", caseState.partnerKey, { conditionType: "heat", description: "d" }),
     ).rejects.toBeInstanceOf(RoleError);
   });
 
-  it("owner key cannot propose_change", async () => {
+  it("tenant (owner) key cannot request_evidence or assemble_packet", async () => {
     const caseState = await buildCase();
     await expect(
-      applyAction(caseState.id, "propose_change", caseState.ownerKey, { text: "x", reason: "y" }),
+      applyAction(caseState.id, "request_evidence", caseState.ownerKey, { ask: "a photo" }),
+    ).rejects.toBeInstanceOf(RoleError);
+    await expect(
+      applyAction(caseState.id, "assemble_packet", caseState.ownerKey, { sections: [{ heading: "Parties", body: "x" }] }),
     ).rejects.toBeInstanceOf(RoleError);
   });
 
-  it("the owner key legitimately adds an item; the partner key legitimately proposes one", async () => {
+  it("prove the gate: commenting out assertRole in log_condition's path would let a partner log a condition", async () => {
+    // This test documents the gate's shape rather than mutating source at runtime: see the
+    // manual break/restore performed and reported in docs/HANDOFF-tools.md instead, since
+    // vitest here runs against the committed assertRole, not a monkey-patched one.
     const caseState = await buildCase();
-    const added = await applyAction(caseState.id, "add_item", caseState.ownerKey, { text: "book the room" });
-    expect(added.items).toHaveLength(2);
-
-    const proposed = await applyAction(caseState.id, "propose_change", caseState.partnerKey, {
-      text: "invite finance",
-      reason: "they need to sign off",
-    });
-    expect(proposed.proposals).toHaveLength(1);
-    expect(proposed.proposals[0].by).toBe("partner");
-    expect(proposed.proposals[0].status).toBe("pending");
+    await expect(
+      applyAction(caseState.id, "log_condition", caseState.partnerKey, { type: "heat", note: "should be blocked" }),
+    ).rejects.toBeInstanceOf(RoleError);
   });
 
-  it("owner accepting a pending proposal adds it as an item and marks it accepted", async () => {
+  it("the tenant key legitimately logs a condition; the advocate key legitimately requests evidence", async () => {
+    const caseState = await buildCase();
+    const logged = await applyAction(caseState.id, "log_condition", caseState.ownerKey, { type: "mold", note: "mold behind the fridge" });
+    expect(logged.conditions).toHaveLength(2);
+
+    const requested = await applyAction(caseState.id, "request_evidence", caseState.partnerKey, { ask: "a photo of the thermostat" });
+    expect(requested.evidenceRequests).toHaveLength(1);
+    expect(requested.evidenceRequests[0].by).toBe("partner");
+    expect(requested.evidenceRequests[0].status).toBe("open");
+  });
+
+  it("tenant answering an open evidence request marks it answered", async () => {
     let caseState = await buildCase();
-    caseState = await applyAction(caseState.id, "propose_change", caseState.partnerKey, {
-      text: "invite finance",
-      reason: "they need to sign off",
-    });
-    const proposalId = caseState.proposals[0].id;
-    const accepted = await applyAction(caseState.id, "accept_change", caseState.ownerKey, { proposalId });
-    expect(accepted.proposals[0].status).toBe("accepted");
-    expect(accepted.items.some((i) => i.text === "invite finance" && i.by === "partner")).toBe(true);
+    caseState = await applyAction(caseState.id, "request_evidence", caseState.partnerKey, { ask: "a photo" });
+    const requestId = caseState.evidenceRequests[0].id;
+    const answered = await applyAction(caseState.id, "answer_evidence", caseState.ownerKey, { requestId, answer: "attached below" });
+    expect(answered.evidenceRequests[0].status).toBe("answered");
+    expect(answered.evidenceRequests[0].answer).toBe("attached below");
   });
 
-  it("owner rejecting a pending proposal never adds an item", async () => {
+  it("advocate assembling a packet then tenant filing it: only the newest draft is filed", async () => {
     let caseState = await buildCase();
-    caseState = await applyAction(caseState.id, "propose_change", caseState.partnerKey, {
-      text: "cancel the meeting",
-      reason: "not needed",
+    caseState = await applyAction(caseState.id, "assemble_packet", caseState.partnerKey, {
+      sections: [{ heading: "Parties", body: "the tenant and the owner" }],
     });
-    const proposalId = caseState.proposals[0].id;
-    const rejected = await applyAction(caseState.id, "accept_change", caseState.ownerKey, {
-      proposalId,
-      decision: "reject",
-    });
-    expect(rejected.proposals[0].status).toBe("rejected");
-    expect(rejected.items.some((i) => i.text === "cancel the meeting")).toBe(false);
+    expect(caseState.packets).toHaveLength(1);
+    expect(caseState.packets[0].status).toBe("draft");
+
+    const filed = await applyAction(caseState.id, "file_packet", caseState.ownerKey, {});
+    expect(filed.packets[0].status).toBe("filed");
+    expect(filed.packets[0].filedAt).toBeDefined();
+  });
+
+  it("file_packet with no draft packet: 400, not a silent no-op", async () => {
+    const caseState = await buildCase();
+    await expect(applyAction(caseState.id, "file_packet", caseState.ownerKey, {})).rejects.toMatchObject({ status: 400 });
   });
 });
 
@@ -130,10 +144,10 @@ describe("both capability keys are stripped from every unauthenticated or model-
     await reader.cancel().catch(() => undefined);
   });
 
-  it("the get_case tool result never contains either key's actual value", async () => {
+  it("the list_conditions tool result never contains either key's actual value", async () => {
     const caseState = await buildCase();
     const stored = await storeGetCase(caseState.id);
-    const toolDef = getCaseToolFactory({
+    const toolDef = listConditionsToolFactory({
       role: "owner",
       caseState: stored,
       actions: {} as never,
@@ -166,33 +180,27 @@ describe("free text over its length ceiling is rejected with 400, never silently
     expect(after.notes.at(-1)!.text).toHaveLength(500);
   });
 
-  it("a report description over 1000 characters: 400, nothing stored", async () => {
+  it("a 311 complaint description over 1000 characters: 400, nothing stored", async () => {
     const caseState = await buildCase();
     const description = "C".repeat(1200);
     await expect(
-      applyAction(caseState.id, "report", caseState.ownerKey, { subject: "s", description }),
+      applyAction(caseState.id, "draft_311", caseState.ownerKey, { conditionType: "heat", description }),
     ).rejects.toMatchObject({ status: 400, message: expect.stringContaining("1200") });
     const after = await storeGetCase(caseState.id);
-    expect(after!.reports).toHaveLength(0);
+    expect(after!.complaints).toHaveLength(0);
   });
 
-  it("a propose_change reason over 500 characters: 400", async () => {
+  it("a request_evidence ask over 280 characters: 400", async () => {
     const caseState = await buildCase();
     await expect(
-      applyAction(caseState.id, "propose_change", caseState.partnerKey, {
-        text: "x",
-        reason: "D".repeat(501),
-      }),
+      applyAction(caseState.id, "request_evidence", caseState.partnerKey, { ask: "D".repeat(300) }),
     ).rejects.toMatchObject({ status: 400 });
   });
 
-  it("a report subject over 120 characters: 400", async () => {
+  it("a log_condition note over 500 characters: 400", async () => {
     const caseState = await buildCase();
     await expect(
-      applyAction(caseState.id, "report", caseState.ownerKey, {
-        subject: "E".repeat(140),
-        description: "too long a subject",
-      }),
+      applyAction(caseState.id, "log_condition", caseState.ownerKey, { type: "heat", note: "E".repeat(600) }),
     ).rejects.toMatchObject({ status: 400 });
   });
 });
@@ -219,17 +227,14 @@ describe("status codes an agent can act on: 404 for an unknown case, 409 for ret
   });
 });
 
-describe("GET /api/case/[id] and the SSE stream spotlight free text the same way get_case does", () => {
-  it("GET wraps notes[].text, reports[].description and proposals[].reason", async () => {
+describe("GET /api/case/[id] and the SSE stream spotlight free text the same way list_conditions does", () => {
+  it("GET wraps notes[].text, conditions[].note and evidenceRequests[].ask/answer", async () => {
     let caseState = await buildCase();
-    caseState = await applyAction(caseState.id, "add_note", caseState.ownerKey, { text: "call me when you land" });
-    caseState = await applyAction(caseState.id, "report", caseState.ownerKey, {
-      subject: "missing signature",
-      description: "the PDF came back unsigned",
-    });
-    caseState = await applyAction(caseState.id, "propose_change", caseState.partnerKey, {
-      text: "invite finance",
-      reason: "they need to sign off",
+    caseState = await applyAction(caseState.id, "add_note", caseState.ownerKey, { text: "call me when the inspector comes" });
+    caseState = await applyAction(caseState.id, "request_evidence", caseState.partnerKey, { ask: "a photo of the thermostat" });
+    caseState = await applyAction(caseState.id, "answer_evidence", caseState.ownerKey, {
+      requestId: caseState.evidenceRequests[0].id,
+      answer: "attached below",
     });
 
     const res = await getCaseRoute(new Request(`http://test/api/case/${caseState.id}`), {
@@ -237,13 +242,10 @@ describe("GET /api/case/[id] and the SSE stream spotlight free text the same way
     } as never);
     const body = (await res.json()) as { case: CaseState };
     const humanNote = body.case.notes.find((n) => n.kind === "note")!;
-    expect(humanNote.text).toBe("<untrusted-user-text>call me when you land</untrusted-user-text>");
-    expect(body.case.reports[0]!.description).toBe(
-      "<untrusted-user-text>the PDF came back unsigned</untrusted-user-text>",
-    );
-    expect(body.case.proposals[0]!.reason).toBe(
-      "<untrusted-user-text>they need to sign off</untrusted-user-text>",
-    );
+    expect(humanNote.text).toBe("<untrusted-user-text>call me when the inspector comes</untrusted-user-text>");
+    expect(body.case.conditions[0]!.note).toBe("<untrusted-user-text>no heat at 7am</untrusted-user-text>");
+    expect(body.case.evidenceRequests[0]!.ask).toBe("<untrusted-user-text>a photo of the thermostat</untrusted-user-text>");
+    expect(body.case.evidenceRequests[0]!.answer).toBe("<untrusted-user-text>attached below</untrusted-user-text>");
     expect(res.headers.get("Cache-Control")).toBe("private, no-store");
   });
 
