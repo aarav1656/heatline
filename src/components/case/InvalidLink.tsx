@@ -9,7 +9,7 @@ export function InvalidLink() {
       <p className="colhead text-tier-out">invalid link</p>
       <h1 className="plate text-[1.5rem]">This link is not valid</h1>
       <p className="max-w-sm text-[0.875rem] leading-snug text-ink-soft">
-        The key in this URL does not match either the owner or the partner link for this case.
+        The key in this URL does not match either the tenant or the advocate link for this case.
         Use the exact URL you were given, not a guessed or edited one.
       </p>
     </div>
