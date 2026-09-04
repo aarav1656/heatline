@@ -18,7 +18,7 @@ A tenant and a legal-aid advocate each get an agent on one NYC building's own en
 
 - Live: https://heatline-nyc.vercel.app
 - Repo: https://github.com/aarav1656/heatline (MIT)
-- Video: (YouTube link added after upload)
+- Video: https://www.youtube.com/watch?v=c6iGV-WVmWw
 
 ---
 
