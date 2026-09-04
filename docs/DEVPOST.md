@@ -17,8 +17,8 @@ A tenant and a legal-aid advocate each get an agent on one NYC building's own en
 ## Links
 
 - Live: https://order-to-correct-psi.vercel.app
-- Repo: https://github.com/kamalbuilds/order-to-correct (MIT)
-- Video: https://youtu.be/5YEBhmyC0H4 (2:18)
+- Repo: https://github.com/aarav1656/order-to-correct (MIT)
+- Video: (YouTube link added after upload)
 
 ---
 
@@ -85,9 +85,9 @@ to the client. 125 tests.
 
 ## What is new since 25 August 2026
 
-Everything. The repository was created on 4 September 2026 from a two-role WebMCP template
-(https://github.com/kamalbuilds/webmcp-two-agent-spine, also new this week); the domain, the data
-index, the tools and the UI were written for this entry.
+Everything. The repository was created on 4 September 2026. The two-role WebMCP spine (capability
+keys, confirm gate, SSE), the domain, the data index, the tools and the UI were all written for
+this entry.
 
 ## Built with
 
