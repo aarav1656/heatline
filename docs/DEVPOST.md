@@ -24,77 +24,51 @@ A tenant and a legal-aid advocate each get an agent on one NYC building's own en
 
 ## Why this use case is a strong fit for WebMCP
 
-A tenant and the advocate helping them are two people with different powers looking at the same
-case. The tenant can log what they see and file; the advocate can build the packet and ask for
-evidence, but cannot file on the tenant's behalf. WebMCP registers tools per session from inside
-the page, so the tenant's link and the advocate's link, on one origin and one deployment, present
-different tool lists to different agents. DevTools > Application > WebMCP shows 12 tools in the
-tenant's window and 9 in the advocate's. `file_packet`, `log_condition` and the declarative
-`draft_311_complaint` exist only in the tenant's; `assemble_hp_action_packet` and
-`request_evidence` only in the advocate's. A server-side MCP server cannot express that because it
-never learns which browser tab is asking. Role is a capability key in the URL, never a label the
-client claims, and every write is re-checked on the server, so a forged call from the wrong
-session is a 403 with a sentence the model can act on.
+I started with a building, not a feature. 2315 Barnes Avenue in the Bronx has 102 open class C violations on HPD's own books. Class C means "immediately hazardous." The oldest one has been open 601 days. All of that is public on NYC Open Data, keyless, one SODA query away, and the tenant freezing on the fourth floor has no idea it exists.
+
+So Heatline puts two people on one case page: the tenant and the legal-aid advocate helping them. They open the same page from two different links. That is the whole trick, and it is only possible because WebMCP registers tools from inside the page rather than from a server that never learns which tab is asking. The tenant's link registers 12 tools; the advocate's link registers 9. `file_packet`, `log_condition` and the 311 form exist only in the tenant's window. `assemble_hp_action_packet` and `request_evidence` exist only in the advocate's. Open DevTools > Application > WebMCP in both windows and you can see the lists differ.
+
+The role is a capability key in the URL, never a label the client claims. Every write is re-checked on the server, so if the advocate's agent forges a `file_packet` call it gets a 403 with a sentence the model can act on: "Only the tenant can file packet. You are the advocate: this stays with the tenant's session."
 
 ## How it creates a better user experience
 
-Before: a tenant with no heat searches HPD Online by address, reads a violations table one row at
-a time, does not know that "class C" means immediately hazardous or that 27-2029 is the heat rule,
-and the advocate rebuilds the same building history by hand for the HP Action petition. After: the
-tenant says "no heat again, 52 degrees at 7am" and the agent calls `match_condition_to_code`
-(section 27-2029, 68F from 6am to 10pm when it is under 55F outside, heat season Oct 1 to May 31),
-then `log_condition`, which parks in a confirmation card until the tenant presses Confirm.
-`building_violation_history` takes no arguments in an open case and returns the building's own
-record: for 2315 Barnes Avenue, 102 open class C violations, the oldest open 601 days, the owner
-and their portfolio size, and the exact NYC Open Data SODA URL beside every number so the claim can
-be checked rather than trusted.
+Before this week, a tenant with no heat does one of two things: calls 311 and waits, or opens HPD Online and reads a violations table row by row without knowing that 27-2029 is the heat rule or what "class C" means. The advocate, if the tenant has one, rebuilds the same building history by hand for the HP Action petition.
+
+Now the tenant types "no heat again, 52 degrees at 7am." The agent calls `match_condition_to_code` and gets back section 27-2029 with the plain-English requirement (68F from 6am to 10pm when it is under 55F outside, heat season October 1 to May 31). Then it calls `log_condition`, which stops inside a confirmation card until the tenant presses Confirm. Not the agent. The tenant.
+
+`building_violation_history` takes no arguments in an open case; it reads the BBL off the case because a tenant has never heard of a BBL. I found that one the hard way: the first version required `bbl` and the advocate's agent called it with `{}` and got "bbl is required." Fixed the same hour.
+
+Every number on the page carries the exact SODA URL that produced it. Judges can paste the URL and get the same 102.
 
 ## What people and agents can now do together that was difficult before
 
-The advocate's agent calls `request_evidence` ("a photo of the thermostat at 7am tomorrow") and it
-lands in the tenant's window over a live stream with no reload; the tenant's agent answers it. The
-advocate's agent then calls `assemble_hp_action_packet`, which builds five sections from the case
-and the city record (parties from the registration, conditions with code sections, building
-record with block comparison, timeline, relief sought) and stores a draft. The tenant's agent sees
-"one draft packet waiting", calls `file_packet`, and a person presses Confirm. The advocate's agent
-cannot file, even by forging the call. The 311 complaint is a declarative form: the agent fills
-every field, only a human presses Send. None of this works with DOM scraping or a shared login.
+The advocate's agent asks the tenant for a photo of the thermostat at 7am tomorrow. That request lands in the tenant's window over a live stream, no reload, and the tenant's agent answers it. Then the advocate's agent calls `assemble_hp_action_packet`, which builds five sections from the case and the city's record: parties (from the HPD registration, owner name and portfolio size), conditions with their code sections, the building record with a block comparison, a timeline, and relief sought. It stores a draft. The tenant's agent sees "one draft packet waiting," calls `file_packet`, and a person presses Confirm.
 
-Context: HPD's own enforcement data (violations dataset wvxf-dwi5, complaints uwyv-629c, 311
-erm2-nwe9, registrations tesw-yqqr and feu5-w2e2) is public and keyless. "Heatline" is the
-name of the notice HPD itself issues. The index behind this entry covers 40 buildings in Bronx zip
-10467 with 6,077 violations, chosen because it is the zip with the most open class C heat
-violations in the borough; the build script and every query are in the repo.
+The 311 complaint is a declarative form: `<form toolname="draft_311_complaint">` with `toolparamdescription` on every field and no `toolautosubmit`. The agent fills it in. Only a human presses Send.
+
+None of this works with a chatbot wrapper or DOM scraping, because nothing else knows which window is asking.
+
+The index behind it covers 40 buildings in zip 10467, chosen because it has the most open class C heat violations in the Bronx, 6,077 violations total. The build script and every query URL are in the repo. "Order to Correct" is HPD's own name for the notice it issues; I kept it as the working title until the product needed a name people would say out loud.
 
 ## How WebMCP was implemented
 
-`document.modelContext.registerTool` only. The runtime reads `document.modelContext` once, falls
-back to `@mcp-b/webmcp-polyfill`, and an on-page badge prints `native`, `polyfill` or
-`unavailable`. Fourteen tools with strict `inputSchema` and `readOnlyHint`; `untrustedContentHint`
-on `list_conditions` and `build_timeline`, the two reads that return text another person typed,
-which is delimited before the model sees it. Tool descriptions are dynamic: `file_packet` says how
-many drafts are waiting, `building_violation_history` names the case's building. Every mutating
-tool builds its own confirm gate inside `execute`, because WebMCP has no destructive-action
-annotation. `draft_311_complaint` is a declarative `<form toolname>` with `toolparamdescription`
-on each field and no `toolautosubmit`. Seventeen eval fixtures under `evals/` assert the expected
-call per user message and, for the negative cases, that the denied tool is absent from that
-session's `toolsForRole`. Read tools fetch from `/api/building/*` so the 1.3 MB index never ships
-to the client. 125 tests.
+`document.modelContext.registerTool`, never `navigator.modelContext`. The runtime checks for the native object once, falls back to `@mcp-b/webmcp-polyfill`, and a badge on the page says which one is running.
+
+Fourteen tools, each with a strict `inputSchema` and `readOnlyHint`. `untrustedContentHint` is set on `list_conditions` and `build_timeline`, the two reads that return text another person typed, and that text is wrapped in `<untrusted-user-text>` before the model sees it. The same wrapping applies on the REST reads and the SSE stream, so an agent that bypasses the tool layer sees the same boundary.
+
+Descriptions are dynamic. `file_packet` says how many drafts are waiting; `building_violation_history` names the case's building and BBL. Every mutating tool builds its own confirm gate inside `execute`, because WebMCP ships no destructive-action annotation.
+
+Seventeen eval fixtures in `evals/` assert the expected call for a given user message. The negative ones assert that the denied tool is absent from that session's `toolsForRole`, so "advocate asks to file it for them" expects no call at all. 125 tests. Read tools fetch from `/api/building/*` so the 1.3 MB index never ships to the client; that was a build-breaking bug on the first day (node:fs in a client bundle) and the fix is in the commit history.
 
 ---
 
 ## What is new since 25 August 2026
 
-Everything. The repository was created on 4 September 2026. The two-role WebMCP spine (capability
-keys, confirm gate, SSE), the domain, the data index, the tools and the UI were all written for
-this entry.
+All of it. The repository was created on 4 September 2026 and every line, including the data index, the two-role spine, the tools and the UI, was written for this entry.
 
 ## Built with
 
-Next.js 16, React 19, TypeScript, Tailwind CSS 4, WebMCP (`document.modelContext`),
-`@mcp-b/webmcp-polyfill`, `@mcp-b/webmcp-types`, Server-Sent Events, Vercel, Upstash Redis,
-Vitest, NYC Open Data (Socrata SODA: HPD violations, complaints, complaint problems, 311, HPD
-registrations).
+Next.js 16, React 19, TypeScript, Tailwind CSS 4, WebMCP (`document.modelContext`), `@mcp-b/webmcp-polyfill`, `@mcp-b/webmcp-types`, Server-Sent Events, Vercel, Upstash Redis, Vitest, NYC Open Data (Socrata SODA: HPD violations `wvxf-dwi5`, complaints `uwyv-629c`, complaint problems `a2nx-4u46`, 311 `erm2-nwe9`, HPD registrations `tesw-yqqr` and `feu5-w2e2`).
 
 ---
 
