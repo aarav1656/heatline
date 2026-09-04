@@ -1,0 +1,8 @@
+{
+  "name": "tenant asks for the link to send their advocate",
+  "role": "owner",
+  "page": "/c/:caseId",
+  "state": "Case just created, advocate has not opened it yet.",
+  "messages": [{ "role": "user", "content": "Give me the link to send my advocate." }],
+  "expectedCall": [{ "functionName": "share_case", "arguments": {} }]
+}

@@ -1,4 +1,13 @@
-import type { CaseActionType, CaseState, Proposal, Role, TimelineEvent } from "@/lib/types";
+import type {
+  CaseActionType,
+  CaseState,
+  Complaint311,
+  Condition,
+  EvidenceRequest,
+  Packet,
+  Role,
+  TimelineEvent,
+} from "@/lib/types";
 import { getCase, putCase, StaleWriteError } from "./index";
 
 export class RoleError extends Error {
@@ -18,18 +27,25 @@ export class ActionError extends Error {
   }
 }
 
-const OWNER_ONLY: CaseActionType[] = ["add_item", "accept_change", "report"];
-const PARTNER_ONLY: CaseActionType[] = ["propose_change"];
+// Server role gates. The tenant is the case's owner: they log conditions, answer evidence
+// requests, file the packet, and draft the 311 complaint. The advocate is the partner: they
+// request evidence and assemble the packet. add_note is open to both.
+const OWNER_ONLY: CaseActionType[] = ["log_condition", "answer_evidence", "file_packet", "draft_311"];
+const PARTNER_ONLY: CaseActionType[] = ["request_evidence", "assemble_packet"];
 
 /**
  * Free-text ceilings. Crossing one is a 400 with the actual and allowed length in the message,
  * not a silent `.slice()` that drops the tail of what someone typed with no signal it happened.
  */
-const ITEM_MAX = 200;
 const NOTE_MAX = 500;
-const REPORT_DESCRIPTION_MAX = 1000;
-const REPORT_SUBJECT_MAX = 120;
-const PROPOSAL_REASON_MAX = 500;
+const CONDITION_NOTE_MAX = 500;
+const CONDITION_READING_MAX = 60;
+const EVIDENCE_ASK_MAX = 280;
+const EVIDENCE_ANSWER_MAX = 500;
+const COMPLAINT_DESCRIPTION_MAX = 1000;
+const PACKET_SECTION_HEADING_MAX = 80;
+const PACKET_SECTION_BODY_MAX = 4000;
+const PACKET_MAX_SECTIONS = 12;
 
 function requireWithinLength(field: string, value: string, max: number): void {
   if (value.length > max) {
@@ -55,12 +71,12 @@ export function roleForKey(caseState: CaseState, key: string): Role | null {
 export function assertRole(type: CaseActionType, role: Role): void {
   if (OWNER_ONLY.includes(type) && role !== "owner") {
     throw new RoleError(
-      `Only the owner can ${type.replace(/_/g, " ")}. You are the partner: propose a change instead and the owner confirms it.`,
+      `Only the tenant can ${type.replace(/_/g, " ")}. You are the advocate: this stays with the tenant's session.`,
     );
   }
   if (PARTNER_ONLY.includes(type) && role !== "partner") {
     throw new RoleError(
-      `Only the partner can ${type.replace(/_/g, " ")}. You are the owner: accept or reject the proposals you already have.`,
+      `Only the advocate can ${type.replace(/_/g, " ")}. You are the tenant: ask your advocate to do this from their session.`,
     );
   }
 }
@@ -78,69 +94,117 @@ type Payload = Record<string, unknown>;
 function mutate(caseState: CaseState, type: CaseActionType, role: Role, payload: Payload): CaseState {
   const next: CaseState = {
     ...caseState,
-    items: [...caseState.items],
-    proposals: [...caseState.proposals],
+    conditions: [...caseState.conditions],
+    evidenceRequests: [...caseState.evidenceRequests],
+    packets: [...caseState.packets],
+    complaints: [...caseState.complaints],
     notes: [...caseState.notes],
-    reports: [...caseState.reports],
     version: caseState.version + 1,
   };
 
   switch (type) {
-    case "add_item": {
-      const text = String(payload.text ?? "").trim();
-      if (!text) throw new ActionError("add_item needs some text.");
-      requireWithinLength("item text", text, ITEM_MAX);
-      next.items.push({ id: id("item"), text, by: role, createdAt: new Date().toISOString() });
-      next.notes.push(event(role, "add_item", `${role} added: ${text}`));
-      return next;
-    }
-
-    case "propose_change": {
-      const text = String(payload.text ?? "").trim();
-      if (!text) throw new ActionError("propose_change needs the text of the change you are proposing.");
-      requireWithinLength("proposed text", text, ITEM_MAX);
-      const reason = String(payload.reason ?? "").trim();
-      if (!reason) throw new ActionError("propose_change needs a reason the owner can read.");
-      requireWithinLength("reason", reason, PROPOSAL_REASON_MAX);
-      const proposal: Proposal = {
-        id: id("p"),
-        by: "partner",
-        payload: { text },
-        reason,
+    case "log_condition": {
+      const conditionType = String(payload.type ?? "").trim();
+      const reading = payload.reading !== undefined ? String(payload.reading).trim() : undefined;
+      const note = String(payload.note ?? "").trim();
+      if (!conditionType) throw new ActionError("log_condition needs a condition type, e.g. \"heat\".");
+      if (!note) throw new ActionError("log_condition needs a short note describing what happened.");
+      requireWithinLength("note", note, CONDITION_NOTE_MAX);
+      if (reading) requireWithinLength("reading", reading, CONDITION_READING_MAX);
+      const condition: Condition = {
+        id: id("cond"),
+        type: conditionType,
+        reading: reading || undefined,
+        at: new Date().toISOString(),
+        note,
+        by: role,
         createdAt: new Date().toISOString(),
-        status: "pending",
+        codeSection: typeof payload.codeSection === "string" ? payload.codeSection : undefined,
       };
-      next.proposals.push(proposal);
-      next.notes.push(event(role, "propose_change", `Partner proposed: ${text} (${reason})`));
+      next.conditions.push(condition);
+      next.notes.push(
+        event(role, "log_condition", `Tenant logged ${conditionType}${reading ? ` (${reading})` : ""}: ${note}`),
+      );
       return next;
     }
 
-    case "accept_change": {
-      const proposalId = String(payload.proposalId ?? "");
-      const decision = payload.decision === "reject" ? "reject" : "accept";
-      const proposal = next.proposals.find((p) => p.id === proposalId);
-      if (!proposal) {
+    case "request_evidence": {
+      const ask = String(payload.ask ?? "").trim();
+      if (!ask) throw new ActionError("request_evidence needs to say what to ask the tenant for.");
+      requireWithinLength("ask", ask, EVIDENCE_ASK_MAX);
+      const request: EvidenceRequest = {
+        id: id("ev"),
+        ask,
+        by: "partner",
+        status: "open",
+        createdAt: new Date().toISOString(),
+      };
+      next.evidenceRequests.push(request);
+      next.notes.push(event(role, "request_evidence", `Advocate asked: ${ask}`));
+      return next;
+    }
+
+    case "answer_evidence": {
+      const requestId = String(payload.requestId ?? "");
+      const answer = String(payload.answer ?? "").trim();
+      const request = next.evidenceRequests.find((r) => r.id === requestId);
+      if (!request) {
         throw new ActionError(
-          `No proposal with id "${proposalId}". Pending proposals: ${next.proposals.filter((p) => p.status === "pending").map((p) => p.id).join(", ") || "none"}.`,
+          `No evidence request with id "${requestId}". Open requests: ${next.evidenceRequests.filter((r) => r.status === "open").map((r) => r.id).join(", ") || "none"}.`,
         );
       }
-      if (proposal.status !== "pending") {
-        throw new ActionError(`Proposal ${proposalId} was already ${proposal.status}.`);
+      if (request.status !== "open") {
+        throw new ActionError(`Evidence request ${requestId} was already answered.`);
       }
-      next.proposals = next.proposals.map((p) =>
-        p.id === proposalId
-          ? { ...p, status: decision === "accept" ? ("accepted" as const) : ("rejected" as const) }
-          : p,
+      if (!answer) throw new ActionError("answer_evidence needs the answer text.");
+      requireWithinLength("answer", answer, EVIDENCE_ANSWER_MAX);
+      next.evidenceRequests = next.evidenceRequests.map((r) =>
+        r.id === requestId ? { ...r, status: "answered" as const, answer, answeredAt: new Date().toISOString() } : r,
       );
-      if (decision === "accept") {
-        const text = String(proposal.payload.text ?? "").trim();
-        if (text) {
-          next.items.push({ id: id("item"), text, by: "partner", createdAt: new Date().toISOString() });
-        }
-        next.notes.push(event(role, "accept_change", `Owner accepted the proposal: ${proposal.reason}`));
-      } else {
-        next.notes.push(event(role, "reject_change", `Owner rejected the proposal: ${proposal.reason}`));
+      next.notes.push(event(role, "answer_evidence", `Tenant answered: ${answer}`));
+      return next;
+    }
+
+    case "assemble_packet": {
+      const rawSections = Array.isArray(payload.sections) ? payload.sections : [];
+      if (rawSections.length === 0) {
+        throw new ActionError("assemble_packet needs at least one section (Parties, Conditions, etc).");
       }
+      if (rawSections.length > PACKET_MAX_SECTIONS) {
+        throw new ActionError(`assemble_packet got ${rawSections.length} sections, over the ${PACKET_MAX_SECTIONS}-section limit.`);
+      }
+      const sections = rawSections.map((s, i) => {
+        const raw = s as Record<string, unknown>;
+        const heading = String(raw.heading ?? "").trim();
+        const body = String(raw.body ?? "").trim();
+        if (!heading) throw new ActionError(`Section ${i + 1} needs a heading.`);
+        if (!body) throw new ActionError(`Section "${heading}" needs a body.`);
+        requireWithinLength(`section "${heading}" heading`, heading, PACKET_SECTION_HEADING_MAX);
+        requireWithinLength(`section "${heading}" body`, body, PACKET_SECTION_BODY_MAX);
+        return { heading, body };
+      });
+      const packet: Packet = {
+        id: id("packet"),
+        sections,
+        assembledBy: "partner",
+        status: "draft",
+        createdAt: new Date().toISOString(),
+      };
+      next.packets.push(packet);
+      next.notes.push(event(role, "assemble_packet", `Advocate assembled a draft HP Action packet (${sections.length} sections).`));
+      return next;
+    }
+
+    case "file_packet": {
+      const drafts = next.packets.filter((p) => p.status === "draft");
+      if (drafts.length === 0) {
+        throw new ActionError("There is no draft packet to file. Assemble one first (the advocate does this).");
+      }
+      const newest = drafts.reduce((a, b) => (a.createdAt > b.createdAt ? a : b));
+      next.packets = next.packets.map((p) =>
+        p.id === newest.id ? { ...p, status: "filed" as const, filedAt: new Date().toISOString() } : p,
+      );
+      next.notes.push(event(role, "file_packet", "Tenant filed the HP Action packet."));
       return next;
     }
 
@@ -152,15 +216,20 @@ function mutate(caseState: CaseState, type: CaseActionType, role: Role, payload:
       return next;
     }
 
-    case "report": {
-      const subject = String(payload.subject ?? "").trim();
+    case "draft_311": {
+      const conditionType = String(payload.conditionType ?? "").trim();
       const description = String(payload.description ?? "").trim();
-      if (!subject) throw new ActionError("A report needs a subject line.");
-      if (!description) throw new ActionError("A report needs a description.");
-      requireWithinLength("subject", subject, REPORT_SUBJECT_MAX);
-      requireWithinLength("description", description, REPORT_DESCRIPTION_MAX);
-      next.reports.push({ id: id("rep"), subject, description, at: new Date().toISOString() });
-      next.notes.push(event(role, "report", `Owner filed a report: ${subject}`));
+      if (!conditionType) throw new ActionError("draft_311 needs a condition type.");
+      if (!description) throw new ActionError("draft_311 needs a description of what happened.");
+      requireWithinLength("description", description, COMPLAINT_DESCRIPTION_MAX);
+      const complaint: Complaint311 = {
+        id: id("311"),
+        conditionType,
+        description,
+        at: new Date().toISOString(),
+      };
+      next.complaints.push(complaint);
+      next.notes.push(event(role, "draft_311", `Tenant filed a 311 complaint for ${conditionType}.`));
       return next;
     }
   }
@@ -185,7 +254,7 @@ export async function applyAction(
     const role = roleForKey(caseState, key);
     if (!role) {
       throw new RoleError(
-        "This link's key does not match this case. Use the owner or partner URL exactly as it was shared; a guessed or edited key is not a valid credential.",
+        "This link's key does not match this case. Use the tenant or advocate URL exactly as it was shared; a guessed or edited key is not a valid credential.",
       );
     }
     assertRole(type, role);

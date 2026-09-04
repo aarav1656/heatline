@@ -1,0 +1,8 @@
+{
+  "name": "what code section covers no heat",
+  "role": "owner",
+  "page": "/c/:caseId",
+  "state": "Case has one condition already: heat, 52F.",
+  "messages": [{ "role": "user", "content": "What code section covers no heat?" }],
+  "expectedCall": [{ "functionName": "match_condition_to_code", "arguments": { "text": "no heat" } }]
+}

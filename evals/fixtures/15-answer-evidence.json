@@ -1,0 +1,8 @@
+{
+  "name": "tenant answers an open evidence request",
+  "role": "owner",
+  "page": "/c/:caseId",
+  "state": "One open evidence request ev1: \"a photo of the thermostat\".",
+  "messages": [{ "role": "user", "content": "Answer ev1: attached the photo, it shows 52F." }],
+  "expectedCall": [{ "functionName": "answer_evidence_request", "arguments": { "requestId": "ev1", "answer": "attached the photo, it shows 52F" } }]
+}

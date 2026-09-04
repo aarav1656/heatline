@@ -1,0 +1,11 @@
+{
+  "name": "tenant logs a 52F reading",
+  "role": "owner",
+  "page": "/c/:caseId",
+  "state": "Empty case, no conditions yet.",
+  "messages": [{ "role": "user", "content": "Log heat: it was 52F in my apartment at 7am today." }],
+  "expectedCall": [
+    { "functionName": "log_condition", "arguments": { "type": "heat", "reading": "52F", "note": "52F in my apartment at 7am today" } }
+  ],
+  "notes": "log_condition suspends behind the confirm card; the tool call still happens, the mutation only lands after the tenant presses Confirm."
+}

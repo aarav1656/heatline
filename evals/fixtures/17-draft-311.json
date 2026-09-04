@@ -1,0 +1,11 @@
+{
+  "name": "tenant drafts a 311 complaint through the declarative form",
+  "role": "owner",
+  "page": "/c/:caseId",
+  "state": "Case has three conditions logged, no 311 complaints yet.",
+  "messages": [{ "role": "user", "content": "Draft a 311 complaint for heat: no heat since January, 52F this morning." }],
+  "expectedCall": [
+    { "functionName": "draft_311_complaint", "arguments": { "conditionType": "heat", "description": "no heat since January, 52F this morning" } }
+  ],
+  "notes": "draft_311_complaint is declarative: the browser synthesises this schema from the form's toolparamdescription attributes, and filling it focuses the submit button rather than sending on its own."
+}

@@ -1,0 +1,8 @@
+{
+  "name": "advocate leaves a note for the tenant",
+  "role": "partner",
+  "page": "/c/:caseId?role=partner",
+  "state": "Case has two conditions logged.",
+  "messages": [{ "role": "user", "content": "Leave a note: \"filing with the court next week, keep logging any new readings\"." }],
+  "expectedCall": [{ "functionName": "add_note", "arguments": { "text": "filing with the court next week, keep logging any new readings" } }]
+}

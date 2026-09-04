@@ -1,0 +1,8 @@
+{
+  "name": "advocate puts together the HP action packet",
+  "role": "partner",
+  "page": "/c/:caseId?role=partner",
+  "state": "Case has two conditions logged and nine open class C violations on the building.",
+  "messages": [{ "role": "user", "content": "Put together the HP action packet for this tenant." }],
+  "expectedCall": [{ "functionName": "assemble_hp_action_packet", "arguments": {} }]
+}

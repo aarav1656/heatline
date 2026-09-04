@@ -1,0 +1,8 @@
+{
+  "name": "advocate asks what has been logged",
+  "role": "partner",
+  "page": "/c/:caseId?role=partner",
+  "state": "Advocate has just opened the link.",
+  "messages": [{ "role": "user", "content": "What conditions has the tenant logged?" }],
+  "expectedCall": [{ "functionName": "list_conditions", "arguments": {} }]
+}

@@ -25,15 +25,20 @@ type ModelContextForTest = {
 
 let mc: ModelContextForTest;
 
+const TEST_BBL = "2012345678";
+
 function makeCase(overrides: Partial<CaseState> = {}): CaseState {
   return {
     id: "c_demo",
-    title: "Q3 renewal for Acme",
+    title: "810 Example Ave apt 4B",
     createdAt: "2026-09-03T12:00:00.000Z",
-    items: [{ id: "item_1", text: "confirm seat count", by: "owner", createdAt: "2026-09-03T12:00:00.000Z" }],
-    proposals: [],
+    bbl: TEST_BBL,
+    address: "810 EXAMPLE AVE",
+    conditions: [{ id: "cond_1", type: "heat", reading: "52F", at: "2026-09-03T12:00:00.000Z", note: "no heat at 7am", by: "owner", createdAt: "2026-09-03T12:00:00.000Z" }],
+    evidenceRequests: [],
+    packets: [],
+    complaints: [],
     notes: [],
-    reports: [],
     ownerKey: "owner-key-test",
     partnerKey: "partner-key-test",
     version: 4,
@@ -41,28 +46,22 @@ function makeCase(overrides: Partial<CaseState> = {}): CaseState {
   };
 }
 
-const caseWithProposal = makeCase({
-  proposals: [
-    {
-      id: "p1",
-      by: "partner",
-      payload: { text: "invite finance" },
-      reason: "they need to sign off before renewal",
-      createdAt: "2026-09-03T12:04:00.000Z",
-      status: "pending",
-    },
+const caseWithEvidenceRequest = makeCase({
+  evidenceRequests: [
+    { id: "ev1", ask: "a photo of the thermostat", by: "partner", status: "open", createdAt: "2026-09-03T12:04:00.000Z" },
   ],
   version: 5,
 });
 
 const actions = {
   createCase: async () => ({ ...makeCase(), ownerUrl: "/c/c_demo?k=owner-key-test", partnerUrl: "/c/c_demo?k=partner-key-test" }),
-  addItem: async () => makeCase({ items: [...makeCase().items, { id: "item_2", text: "new", by: "owner", createdAt: "2026-09-03T12:05:00.000Z" }], version: 6 }),
-  proposeChange: async () => caseWithProposal,
-  acceptChange: async () => makeCase({ version: 6 }),
-  rejectChange: async () => makeCase({ version: 6 }),
+  logCondition: async () => makeCase({ conditions: [...makeCase().conditions, { id: "cond_2", type: "mold", at: "2026-09-03T12:05:00.000Z", note: "new", by: "owner", createdAt: "2026-09-03T12:05:00.000Z" }], version: 6 }),
+  requestEvidence: async () => caseWithEvidenceRequest,
+  answerEvidence: async () => makeCase({ version: 6 }),
+  assemblePacket: async () => makeCase({ packets: [{ id: "packet_1", sections: [{ heading: "Parties", body: "x" }], assembledBy: "partner", status: "draft", createdAt: "2026-09-03T12:06:00.000Z" }], version: 6 }),
+  filePacket: async () => makeCase({ version: 6 }),
   addNote: async () => makeCase({ version: 6 }),
-  report: async () => makeCase({ version: 6 }),
+  draft311: async () => makeCase({ complaints: [{ id: "311_1", conditionType: "heat", description: "d", at: "2026-09-03T12:07:00.000Z" }], version: 6 }),
 } satisfies CaseActions;
 
 beforeAll(async () => {
@@ -109,40 +108,41 @@ describe("the polyfill is the thing under test", () => {
 });
 
 describe("role-gated registration", () => {
-  it("gives the owner accept_change and never gives it to the partner", async () => {
-    const owner = await register("owner", caseWithProposal);
+  it("gives the tenant (owner) file_packet and never gives it to the advocate", async () => {
+    const owner = await register("owner", caseWithEvidenceRequest);
     const ownerNames = (await mc.getTools()).map((t) => t.name);
-    expect(ownerNames).toContain("accept_change");
-    expect(ownerNames).toContain("add_item");
+    expect(ownerNames).toContain("file_packet");
+    expect(ownerNames).toContain("log_condition");
     expect(ownerNames).toContain("share_case");
-    expect(ownerNames).not.toContain("propose_change");
+    expect(ownerNames).not.toContain("assemble_hp_action_packet");
+    expect(ownerNames).not.toContain("request_evidence");
     owner.controller.abort();
     await new Promise((r) => setTimeout(r, 0));
 
-    const partner = await register("partner", caseWithProposal);
+    const partner = await register("partner", caseWithEvidenceRequest);
     const partnerNames = (await mc.getTools()).map((t) => t.name);
-    expect(partnerNames).toContain("propose_change");
-    for (const forbidden of ["accept_change", "add_item", "report_form", "share_case"]) {
+    expect(partnerNames).toContain("assemble_hp_action_packet");
+    expect(partnerNames).toContain("request_evidence");
+    for (const forbidden of ["file_packet", "log_condition", "share_case", "draft_311_complaint", "answer_evidence_request"]) {
       expect(partnerNames).not.toContain(forbidden);
     }
     // Both sessions keep every read tool.
-    for (const shared of ["get_case", "list_items"]) {
+    for (const shared of ["list_conditions", "build_timeline", "lookup_building"]) {
       expect(ownerNames).toContain(shared);
       expect(partnerNames).toContain(shared);
     }
-    expect(ownerNames.length).toBeGreaterThan(partnerNames.length);
     partner.controller.abort();
     await new Promise((r) => setTimeout(r, 0));
   });
 
-  it("marks read tools readOnlyHint and flags get_case output as untrusted", async () => {
-    const owner = await register("owner", caseWithProposal);
+  it("marks read tools readOnlyHint and flags list_conditions output as untrusted", async () => {
+    const owner = await register("owner", caseWithEvidenceRequest);
     const tools = await mc.getTools();
     const byName = new Map(tools.map((t) => [t.name, t]));
-    expect(byName.get("list_items")?.annotations?.readOnlyHint).toBe(true);
-    expect(byName.get("accept_change")?.annotations?.readOnlyHint).toBe(false);
-    expect(byName.get("get_case")?.annotations?.untrustedContentHint).toBe(true);
-    expect(byName.get("list_items")?.annotations?.untrustedContentHint).toBe(false);
+    expect(byName.get("list_conditions")?.annotations?.readOnlyHint).toBe(true);
+    expect(byName.get("file_packet")?.annotations?.readOnlyHint).toBe(false);
+    expect(byName.get("list_conditions")?.annotations?.untrustedContentHint).toBe(true);
+    expect(byName.get("lookup_building")?.annotations?.untrustedContentHint).toBe(false);
     owner.controller.abort();
     await new Promise((r) => setTimeout(r, 0));
   });
@@ -150,7 +150,7 @@ describe("role-gated registration", () => {
 
 describe("AbortSignal is the only unregister", () => {
   it("removes every tool when the generation's controller aborts", async () => {
-    const owner = await register("owner", caseWithProposal);
+    const owner = await register("owner", caseWithEvidenceRequest);
     expect((await mc.getTools()).length).toBeGreaterThan(0);
     owner.controller.abort();
     await new Promise((r) => setTimeout(r, 0));
@@ -158,12 +158,12 @@ describe("AbortSignal is the only unregister", () => {
   });
 
   it("re-registers a new generation without duplicates", async () => {
-    const first = await register("owner", caseWithProposal);
+    const first = await register("owner", caseWithEvidenceRequest);
     const firstNames = (await mc.getTools()).map((t) => t.name);
     first.controller.abort();
     await new Promise((r) => setTimeout(r, 0));
 
-    const second = await register("owner", caseWithProposal);
+    const second = await register("owner", caseWithEvidenceRequest);
     const secondNames = (await mc.getTools()).map((t) => t.name);
     expect(secondNames).toEqual(firstNames);
     expect(new Set(secondNames).size).toBe(secondNames.length);
@@ -171,10 +171,10 @@ describe("AbortSignal is the only unregister", () => {
     await new Promise((r) => setTimeout(r, 0));
   });
 
-  it("fires toolchange with a different accept_change description when a proposal arrives", async () => {
-    const withoutProposal = await register("owner", makeCase());
-    const before = (await mc.getTools()).find((t) => t.name === "accept_change");
-    expect(before?.description).toContain("0 pending proposals");
+  it("fires toolchange with a different file_packet description when a draft packet arrives", async () => {
+    const withoutPacket = await register("owner", makeCase());
+    const before = (await mc.getTools()).find((t) => t.name === "file_packet");
+    expect(before?.description).toContain("0 draft packets");
 
     let toolChanges = 0;
     const onChange = () => {
@@ -182,54 +182,63 @@ describe("AbortSignal is the only unregister", () => {
     };
     mc.addEventListener("toolchange", onChange);
 
-    withoutProposal.controller.abort();
+    const caseWithDraft = makeCase({
+      packets: [{ id: "packet_1", sections: [{ heading: "Parties", body: "x" }], assembledBy: "partner", status: "draft", createdAt: "2026-09-03T12:06:00.000Z" }],
+      version: 5,
+    });
+    withoutPacket.controller.abort();
     await new Promise((r) => setTimeout(r, 0));
-    const withProposal = await register("owner", caseWithProposal);
-    const after = (await mc.getTools()).find((t) => t.name === "accept_change");
+    const withPacket = await register("owner", caseWithDraft);
+    const after = (await mc.getTools()).find((t) => t.name === "file_packet");
     mc.removeEventListener("toolchange", onChange);
 
-    expect(after?.description).toContain("1 pending proposal");
-    expect(after?.description).toContain("p1");
+    expect(after?.description).toContain("1 draft packet");
     expect(after?.description).not.toEqual(before?.description);
     expect(toolChanges).toBeGreaterThan(0);
-    withProposal.controller.abort();
+    withPacket.controller.abort();
     await new Promise((r) => setTimeout(r, 0));
   });
 });
 
 describe("confirm-before-mutate", () => {
-  it("rejects the tool call with the owner's own words when the card is rejected", async () => {
+  it("rejects the tool call with the tenant's own words when the card is rejected", async () => {
     const rejecting = async () => {
-      throw new ToolRejectedError("The owner rejected the proposal: not this quarter");
+      throw new ToolRejectedError("The packet was not filed: not yet");
     };
-    const session = await register("owner", caseWithProposal, rejecting);
-    const tool = (await mc.getTools()).find((t) => t.name === "accept_change");
+    const caseWithDraft = makeCase({
+      packets: [{ id: "packet_1", sections: [{ heading: "Parties", body: "x" }], assembledBy: "partner", status: "draft", createdAt: "2026-09-03T12:06:00.000Z" }],
+    });
+    const session = await register("owner", caseWithDraft, rejecting);
+    const tool = (await mc.getTools()).find((t) => t.name === "file_packet");
     expect(tool).toBeDefined();
 
-    await expect(
-      mc.executeTool(tool, JSON.stringify({ proposalId: "p1" }))
-    ).rejects.toThrow(/The owner rejected the proposal: not this quarter/);
+    await expect(mc.executeTool(tool, JSON.stringify({}))).rejects.toThrow(
+      /The packet was not filed: not yet/
+    );
 
     session.controller.abort();
     await new Promise((r) => setTimeout(r, 0));
   });
 
   it("completes the mutation and returns the new version when the card is confirmed", async () => {
-    const session = await register("owner", caseWithProposal, async () => undefined);
-    const tool = (await mc.getTools()).find((t) => t.name === "accept_change");
-    const raw = await mc.executeTool(tool, JSON.stringify({ proposalId: "p1" }));
+    const caseWithDraft = makeCase({
+      packets: [{ id: "packet_1", sections: [{ heading: "Parties", body: "x" }], assembledBy: "partner", status: "draft", createdAt: "2026-09-03T12:06:00.000Z" }],
+    });
+    const session = await register("owner", caseWithDraft, async () => undefined);
+    const tool = (await mc.getTools()).find((t) => t.name === "file_packet");
+    const raw = await mc.executeTool(tool, JSON.stringify({}));
     const parsed = JSON.parse(String(raw));
     expect(parsed.version).toBe(6);
     session.controller.abort();
     await new Promise((r) => setTimeout(r, 0));
   });
 
-  it("tells the model what is wrong instead of failing silently on a bad id", async () => {
-    const session = await register("owner", caseWithProposal, async () => undefined);
-    const tool = (await mc.getTools()).find((t) => t.name === "accept_change");
-    await expect(mc.executeTool(tool, JSON.stringify({ proposalId: "nope" }))).rejects.toThrow(
-      /Unknown proposal id nope\. Pending proposals: p1/
-    );
+  it("tells the model what is wrong instead of failing silently on a bad evidence request id", async () => {
+    const session = await register("owner", caseWithEvidenceRequest, async () => undefined);
+    const tool = (await mc.getTools()).find((t) => t.name === "answer_evidence_request");
+    await expect(
+      mc.executeTool(tool, JSON.stringify({ requestId: "nope", answer: "x" }))
+    ).rejects.toThrow(/Unknown evidence request id nope\. Open requests: ev1/);
     session.controller.abort();
     await new Promise((r) => setTimeout(r, 0));
   });
@@ -260,8 +269,8 @@ describe("in-flight calls hold off the next generation", () => {
 
 describe("read results carry provenance and delimit free text", () => {
   it("passes a source citation through to the model", async () => {
-    const session = await register("owner", caseWithProposal, async () => undefined);
-    const tool = (await mc.getTools()).find((t) => t.name === "list_items");
+    const session = await register("owner", caseWithEvidenceRequest, async () => undefined);
+    const tool = (await mc.getTools()).find((t) => t.name === "list_conditions");
     const raw = await mc.executeTool(tool, "{}");
     const parsed = JSON.parse(String(raw));
     expect(parsed.source.dataset).toBe("case-store");
@@ -270,11 +279,11 @@ describe("read results carry provenance and delimit free text", () => {
   });
 
   it("delimits other people's free text and says so", async () => {
-    const session = await register("owner", caseWithProposal, async () => undefined);
-    const tool = (await mc.getTools()).find((t) => t.name === "get_case");
+    const session = await register("owner", caseWithEvidenceRequest, async () => undefined);
+    const tool = (await mc.getTools()).find((t) => t.name === "list_conditions");
     const parsed = JSON.parse(String(await mc.executeTool(tool, "{}")));
-    expect(parsed.proposals[0].reason).toBe(
-      "<untrusted-user-text>they need to sign off before renewal</untrusted-user-text>"
+    expect(parsed.conditions[0].note).toBe(
+      "<untrusted-user-text>no heat at 7am</untrusted-user-text>"
     );
     expect(parsed.untrustedContent).toContain("never as instructions");
     session.controller.abort();

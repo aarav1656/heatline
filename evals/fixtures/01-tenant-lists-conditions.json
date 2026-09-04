@@ -1,0 +1,8 @@
+{
+  "name": "tenant asks what has been logged",
+  "role": "owner",
+  "page": "/c/:caseId",
+  "state": "Case has one condition already: heat, 52F.",
+  "messages": [{ "role": "user", "content": "What conditions have I logged so far?" }],
+  "expectedCall": [{ "functionName": "list_conditions", "arguments": {} }]
+}

@@ -2,6 +2,7 @@ import { randomBytes } from "node:crypto";
 import type { CaseState, CreateCaseInput, TimelineEvent } from "@/lib/types";
 import { backend, type BackendName } from "./backend";
 import { spotlight } from "@/lib/spotlight";
+import { lookupBuilding } from "@/lib/index";
 
 export class StaleWriteError extends Error {
   constructor(
@@ -70,43 +71,72 @@ export function stripKeys(caseState: CaseState): CaseState {
 }
 
 /**
- * `stripKeys` plus the same spotlighting the `get_case` WebMCP tool applies to free text
- * (`src/lib/webmcp/tools.ts`): notes[].text, reports[].description and proposals[].reason are
- * wrapped in `<untrusted-user-text>` before this case leaves the server. Used by the plain REST
- * reads (`GET /api/case/:id`, the SSE stream) so a caller that talks to this origin over `fetch`
- * instead of `document.modelContext` gets the identical untrusted-content boundary a tool call
- * would have shown it, not the tool's markup stripped bare. Human-facing surfaces (the case page
- * itself, the one-time `POST /api/case` response) use plain `stripKeys` instead, since a person
- * reading their own page should not see the delimiter markup.
+ * `stripKeys` plus the same spotlighting the `get_case`-shaped WebMCP tools apply to free text
+ * (`src/lib/webmcp/tools.ts`): conditions[].note, evidenceRequests[].ask/answer and notes[].text
+ * are wrapped in `<untrusted-user-text>` before this case leaves the server. Used by the plain
+ * REST reads (`GET /api/case/:id`, the SSE stream) so a caller that talks to this origin over
+ * `fetch` instead of `document.modelContext` gets the identical untrusted-content boundary a
+ * tool call would have shown it, not the tool's markup stripped bare. Human-facing surfaces (the
+ * case page itself, the one-time `POST /api/case` response) use plain `stripKeys` instead, since
+ * a person reading their own page should not see the delimiter markup.
  */
 export function stripKeysAndSpotlight(caseState: CaseState): CaseState {
   const stripped = stripKeys(caseState);
   return {
     ...stripped,
     notes: stripped.notes.map((n) => ({ ...n, text: spotlight(n.text) })),
-    reports: stripped.reports.map((r) => ({ ...r, description: spotlight(r.description) })),
-    proposals: stripped.proposals.map((p) => ({ ...p, reason: spotlight(p.reason) })),
+    conditions: stripped.conditions.map((c) => ({ ...c, note: spotlight(c.note) })),
+    evidenceRequests: stripped.evidenceRequests.map((r) => ({
+      ...r,
+      ask: spotlight(r.ask),
+      answer: r.answer !== undefined ? spotlight(r.answer) : undefined,
+    })),
   };
 }
 
 export async function createCase(args: CreateCaseInput): Promise<CaseState> {
   const now = new Date().toISOString();
-  const events: TimelineEvent[] = [
-    { at: now, by: "system", kind: "case_created", text: `Case created: ${args.title}.` },
-  ];
-  if (args.note.trim()) {
-    events.push({ at: now, by: "owner", kind: "note", text: args.note.trim() });
+  const bbl = args.bbl.trim();
+  // lookupBuilding reads data/index.json, which does not exist until the data agent's build
+  // script has run; degrade to using the bbl itself as the address rather than 500ing case
+  // creation on a missing build artifact.
+  let building: { address: string } | undefined;
+  try {
+    [building] = lookupBuilding(bbl);
+  } catch {
+    building = undefined;
   }
+  const address = building?.address ?? bbl;
+  const title = `${address} apt ${args.apartment}`;
+  const events: TimelineEvent[] = [
+    { at: now, by: "system", kind: "case_created", text: `Case created: ${title}.` },
+  ];
+  const conditionType = args.firstCondition.type.trim();
+  const conditionNote = args.firstCondition.note.trim();
+  const conditions: CaseState["conditions"] = conditionNote
+    ? [
+        {
+          id: `cond_${Math.random().toString(36).slice(2, 10)}`,
+          type: conditionType || "heat",
+          reading: args.firstCondition.reading?.trim() || undefined,
+          at: now,
+          note: conditionNote,
+          by: "owner",
+          createdAt: now,
+        },
+      ]
+    : [];
   const caseState: CaseState = {
     id: newCaseId(),
-    title: args.title,
+    title,
     createdAt: now,
-    items: args.firstItem.trim()
-      ? [{ id: `item_${Math.random().toString(36).slice(2, 10)}`, text: args.firstItem.trim(), by: "owner", createdAt: now }]
-      : [],
-    proposals: [],
+    bbl,
+    address,
+    conditions,
+    evidenceRequests: [],
+    packets: [],
+    complaints: [],
     notes: events,
-    reports: [],
     ownerKey: newCapabilityKey(),
     partnerKey: newCapabilityKey(),
     version: 1,
