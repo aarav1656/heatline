@@ -1,0 +1,376 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Order to Correct: one building record, two agents",
+    "output": "architecture.html",
+    "quality_profile": "showcase",
+    "visual_preset": "editorial",
+    "views": [
+      {
+        "id": "record",
+        "label": "The building record",
+        "focus": [
+          "hpd",
+          "c311",
+          "reg",
+          "index",
+          "api"
+        ],
+        "note": "Four keyless NYC Open Data feeds become one per-building enforcement index, with the SODA URL kept beside every number."
+      },
+      {
+        "id": "two-sessions",
+        "label": "Two sessions, two tool sets",
+        "focus": [
+          "tenant",
+          "advocate",
+          "page",
+          "gate"
+        ],
+        "note": "The same page registers different WebMCP tools for the tenant link and the advocate link. The server re-checks the role on every write."
+      },
+      {
+        "id": "human-gate",
+        "label": "A person confirms every write",
+        "focus": [
+          "tenant",
+          "confirm",
+          "store",
+          "sse"
+        ],
+        "note": "Mutations pause inside a confirm card. Filing and the 311 form only happen when a human presses the button."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "hpd",
+      "type": "external",
+      "label": "HPD violations",
+      "sublabel": "wvxf-dwi5",
+      "pos": [
+        30,
+        110
+      ],
+      "size": [
+        140,
+        56
+      ]
+    },
+    {
+      "id": "c311",
+      "type": "external",
+      "label": "311 heat calls",
+      "sublabel": "erm2-nwe9",
+      "pos": [
+        30,
+        220
+      ],
+      "size": [
+        140,
+        56
+      ]
+    },
+    {
+      "id": "reg",
+      "type": "external",
+      "label": "HPD registrations",
+      "sublabel": "feu5-w2e2",
+      "pos": [
+        30,
+        330
+      ],
+      "size": [
+        140,
+        56
+      ]
+    },
+    {
+      "id": "index",
+      "type": "database",
+      "label": "Building index",
+      "sublabel": "40 BBLs, 6,077 rows",
+      "pos": [
+        250,
+        220
+      ],
+      "size": [
+        150,
+        60
+      ],
+      "tag": "SODA URL per number"
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "/api/building",
+      "sublabel": "route handlers",
+      "pos": [
+        470,
+        220
+      ],
+      "size": [
+        140,
+        56
+      ]
+    },
+    {
+      "id": "page",
+      "type": "frontend",
+      "label": "Case page",
+      "sublabel": "modelContext",
+      "pos": [
+        680,
+        220
+      ],
+      "size": [
+        150,
+        60
+      ],
+      "tag": "registerTool per role"
+    },
+    {
+      "id": "tenant",
+      "type": "frontend",
+      "label": "Tenant's agent",
+      "sublabel": "12 tools",
+      "pos": [
+        890,
+        90
+      ],
+      "size": [
+        150,
+        60
+      ]
+    },
+    {
+      "id": "advocate",
+      "type": "frontend",
+      "label": "Advocate's agent",
+      "sublabel": "9 tools",
+      "pos": [
+        890,
+        350
+      ],
+      "size": [
+        150,
+        60
+      ]
+    },
+    {
+      "id": "confirm",
+      "type": "security",
+      "label": "Confirm card",
+      "sublabel": "human presses Confirm",
+      "pos": [
+        1100,
+        90
+      ],
+      "size": [
+        150,
+        56
+      ]
+    },
+    {
+      "id": "gate",
+      "type": "security",
+      "label": "Role gate",
+      "sublabel": "key -> role, 403",
+      "pos": [
+        1100,
+        350
+      ],
+      "size": [
+        150,
+        56
+      ]
+    },
+    {
+      "id": "store",
+      "type": "database",
+      "label": "Case store",
+      "sublabel": "Upstash, versioned",
+      "pos": [
+        1100,
+        220
+      ],
+      "size": [
+        150,
+        56
+      ]
+    },
+    {
+      "id": "sse",
+      "type": "messagebus",
+      "label": "SSE stream",
+      "sublabel": "no reload",
+      "pos": [
+        890,
+        220
+      ],
+      "size": [
+        150,
+        56
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "NYC Open Data, keyless",
+      "wraps": [
+        "hpd",
+        "c311",
+        "reg"
+      ]
+    },
+    {
+      "kind": "security-group",
+      "label": "One origin, two links",
+      "wraps": [
+        "page",
+        "tenant",
+        "advocate",
+        "confirm"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "hpd-index",
+      "from": "hpd",
+      "to": "index",
+      "label": "SODA pull",
+      "fromSide": "right",
+      "toSide": "top",
+      "via": [
+        [
+          325,
+          138
+        ]
+      ]
+    },
+    {
+      "id": "c311-index",
+      "from": "c311",
+      "to": "index"
+    },
+    {
+      "id": "reg-index",
+      "from": "reg",
+      "to": "index",
+      "fromSide": "right",
+      "toSide": "bottom",
+      "via": [
+        [
+          325,
+          358
+        ]
+      ]
+    },
+    {
+      "id": "index-api",
+      "from": "index",
+      "to": "api",
+      "variant": "emphasis",
+      "labelDy": -16
+    },
+    {
+      "id": "api-page",
+      "from": "api",
+      "to": "page",
+      "label": "record",
+      "variant": "emphasis",
+      "labelDy": -16
+    },
+    {
+      "id": "page-tenant",
+      "from": "page",
+      "to": "tenant",
+      "label": "owner key",
+      "fromSide": "top",
+      "toSide": "left"
+    },
+    {
+      "id": "page-advocate",
+      "from": "page",
+      "to": "advocate",
+      "label": "partner key",
+      "fromSide": "bottom",
+      "toSide": "left"
+    },
+    {
+      "id": "tenant-confirm",
+      "from": "tenant",
+      "to": "confirm",
+      "label": "file_packet",
+      "variant": "security"
+    },
+    {
+      "id": "advocate-gate",
+      "from": "advocate",
+      "to": "gate",
+      "label": "assemble",
+      "variant": "security"
+    },
+    {
+      "id": "confirm-store",
+      "from": "confirm",
+      "to": "store",
+      "label": "role ok",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDy": 24
+    },
+    {
+      "id": "gate-store",
+      "from": "gate",
+      "to": "store",
+      "label": "role ok",
+      "fromSide": "top",
+      "toSide": "bottom",
+      "labelDy": -24
+    },
+    {
+      "id": "store-sse",
+      "from": "store",
+      "to": "sse",
+      "label": "version",
+      "variant": "dashed"
+    },
+    {
+      "id": "sse-page",
+      "from": "sse",
+      "to": "page",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "The record",
+      "items": [
+        "2315 Barnes Ave: 102 open class C, oldest 601 days",
+        "Every number carries its SODA query URL"
+      ]
+    },
+    {
+      "dot": "slate",
+      "title": "Two tool sets",
+      "items": [
+        "Tenant: log_condition, file_packet, draft_311_complaint",
+        "Advocate: assemble_hp_action_packet, request_evidence",
+        "Neither can forge the other's call: server 403"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Human in the loop",
+      "items": [
+        "Every write pauses in a confirm card",
+        "311 form is declarative, no toolautosubmit"
+      ]
+    }
+  ]
+}

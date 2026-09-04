@@ -1,5 +1,5 @@
 # id	vtype	vpath	effect	audio	audio_sec	gap_after	caption
-1	video	clips/hook.mp4	none	narration/line1.wav	7.600000	0.4	Hi, I'm Kamal. This is a story about an apartment that held fifty-two degrees at seven in the morning, eleven mornings in a row.
+1	video	clips/hook.mp4	none	narration/line1.wav	7.140000	0.4	Hi, I'm Kamal. This is a story about an apartment that held fifty-two degrees at seven in the morning, eleven mornings in a row.
 2	image	diagrams/problem.png	zoomhold	narration/line2.wav	15.630000	0.4	The tenant's landlord stopped answering in January. What the tenant didn't know is that the city already had a file on the building: 2315 Barnes Avenue in the Bronx, 102 open class C violations, the oldest open for 601 days.
 3	image	diagrams/two-sessions.png	none	narration/line3.wav	8.430000	0.4	Order to Correct is a shared case page for a tenant and a legal aid advocate. Each of them gets their own agent, on the same page, with different tools.
 4	image	diagrams/pipeline.png	none	narration/line4.wav	11.140000	0.4	The data is New York's own housing enforcement record: HPD violations, complaints, 311 heat calls, and owner registrations, pulled by SODA query with the exact URL kept beside every number.
@@ -12,4 +12,4 @@
 11	video	clips/11.mp4	none	narration/line11.wav	7.370000	0.4	Last, the 311 complaint. It's a declarative WebMCP form. The agent fills every field. Only a human presses Send.
 12	image	diagrams/two-sessions.png	none	narration/line12.wav	10.800000	0.4	No chatbot wrapper can do this, because nothing else knows which window is asking. The page declares its own tools, the roles are capability keys, and every write goes through a person.
 13	image	diagrams/pipeline.png	none	narration/line13.wav	8.520000	0.8	The city's own record was always public. Now the tenant's agent can read it, and the advocate's agent can build the case from it. That's Order to Correct.
-end	slide	assemble/slides/endcard.png	none	-	2.0	0	
+end	slide	assemble/slides/endcard.png	none	-	1.6	0	

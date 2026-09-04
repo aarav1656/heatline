@@ -16,7 +16,7 @@ A tenant and a legal-aid advocate each get an agent on one NYC building's own en
 
 ## Links
 
-- Live: https://order-to-correct.vercel.app
+- Live: https://order-to-correct-psi.vercel.app
 - Repo: https://github.com/kamalbuilds/order-to-correct (MIT)
 - Video: https://youtu.be/5YEBhmyC0H4 (2:18)
 
@@ -101,7 +101,7 @@ registrations).
 ## Testing instructions (submission field)
 
 No login, no API key, no setup. Chrome 149 or later with WebMCP turned on at
-`chrome://flags/#enable-webmcp-testing`. Open https://order-to-correct.vercel.app.
+`chrome://flags/#enable-webmcp-testing`. Open https://order-to-correct-psi.vercel.app.
 
 1. **Create the demo case.** Search "Barnes" and pick 2315 Barnes Avenue (BBL 2043520010, 102 open
    class C). Apartment 4C, condition heat, reading "52F at 7am". Create. You are the tenant.

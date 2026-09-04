@@ -55,8 +55,7 @@ OUT="$SEG_DIR/${id}.mp4"
 if [ "$vtype" = "slide" ] && [ "$id" = "end" ] && [ ! -f "$vpath" ]; then
   python3 "$MAKE_SLIDE" "$vpath" \
     "Order to Correct|#000000|76" \
-    "order-to-correct.vercel.app|#000000|40" \
-    "github.com/kamalbuilds/order-to-correct|#000000|40" \
+    "order-to-correct-psi.vercel.app|#000000|40" \
     --bg "#ffffff" --width 1920 --height 1080 --line-height 110
 fi
 
