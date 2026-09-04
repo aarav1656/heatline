@@ -1,9 +1,18 @@
 # Order to Correct
 
-A tenant at 68°F for eleven mornings. The landlord has been silent since January. The building
-already carries nine open class C, "immediately hazardous," HPD violations. The tenant knows
+A tenant at 52F at 7am for eleven mornings. The landlord has been silent since January. The
+building, 2315 Barnes Avenue in the Bronx, already carries 102 open class C ("immediately
+hazardous") HPD violations, the oldest open 601 days (index built 2026-09-04; live count in
+`data/index-meta.json` and on the case page's Building record panel, with the SODA URL beside it). The tenant knows
 something is legally wrong; they don't know the housing code section, they don't have the
 paperwork, and they don't have an advocate on retainer to assemble one.
+
+Before: the tenant opens HPD Online, reads a violations table one row at a time, and does not know
+what class C means or that 27-2029 is the heat rule; the advocate rebuilds the same building
+history by hand for the HP Action petition, typically hours across HPD Online, 311 and ACRIS.
+After: one `building_violation_history` call returns the record with counts, oldest-open days,
+owner and portfolio size, and `match_condition_to_code` names the section from the tenant's own
+words; the packet's five sections assemble from that in one confirmed call. Estimate, not measured.
 
 Order to Correct is one shared case page for a tenant and their legal-aid advocate, each with a
 different WebMCP tool set on the same origin. The tenant's agent logs conditions as they happen,
