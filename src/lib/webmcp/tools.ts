@@ -14,12 +14,53 @@ import type { CaseState, JsonSchema, Role, SourceRef, WebMcpToolDef } from "./co
 import type { CaseActions } from "./contracts";
 import { confirm as defaultConfirm, type ConfirmRequest } from "./confirm";
 import { spotlight } from "@/lib/spotlight";
-import {
-  lookupBuilding as indexLookupBuilding,
-  getBuildingRecord,
-  compareToBlock as indexCompareToBlock,
-  matchConditionToCode as indexMatchConditionToCode,
-} from "@/lib/index";
+import type { Building, BuildingRecord, CodeMatch } from "@/lib/index";
+
+/**
+ * This module is imported by `WebMCPTools.tsx`, a `"use client"` component, so every symbol
+ * reachable from here gets bundled for the browser. `@/lib/index` reads `data/index.json` via
+ * `node:fs`, and Turbopack's client chunker cannot bundle `node:fs` at all (it fails the whole
+ * `next build`, not just this file), so the building/code index is reached over `fetch()` against
+ * the `/api/building*` and `/api/code/match` REST routes (src/app/api/**) instead of a direct
+ * import. Only the *types* are imported above; they compile away and never appear in the bundle.
+ */
+async function fetchJson<T>(url: string): Promise<T> {
+  const res = await fetch(url, { cache: "no-store" });
+  const body = (await res.json().catch(() => ({}))) as { error?: string } & Record<string, unknown>;
+  if (!res.ok) {
+    throw new Error(body.error ?? `${url} failed with HTTP ${res.status}.`);
+  }
+  return body as T;
+}
+
+async function apiLookupBuilding(query: string): Promise<Building[]> {
+  const body = await fetchJson<{ buildings: Building[] }>(`/api/building?q=${encodeURIComponent(query)}`);
+  return body.buildings;
+}
+
+async function apiGetBuildingRecord(bbl: string): Promise<BuildingRecord | null> {
+  try {
+    const body = await fetchJson<{ record: BuildingRecord }>(`/api/building/${encodeURIComponent(bbl)}`);
+    return body.record;
+  } catch {
+    return null;
+  }
+}
+
+async function apiCompareToBlock(
+  bbl: string,
+): Promise<{ building: number; blockMedian: number; blockCount: number; source: SourceRef } | null> {
+  try {
+    return await fetchJson(`/api/building/${encodeURIComponent(bbl)}/compare`);
+  } catch {
+    return null;
+  }
+}
+
+async function apiMatchConditionToCode(text: string): Promise<CodeMatch[]> {
+  const body = await fetchJson<{ matches: CodeMatch[] }>(`/api/code/match?text=${encodeURIComponent(text)}`);
+  return body.matches;
+}
 
 export { spotlight };
 
@@ -116,7 +157,7 @@ export function lookupBuilding(ctx: Ctx): WebMcpToolDef {
     execute: async (input) => {
       const query = String(input.query ?? "").trim();
       if (!query) throw new Error("query is required.");
-      const buildings = indexLookupBuilding(query);
+      const buildings = await apiLookupBuilding(query);
       return {
         buildings,
         count: buildings.length,
@@ -137,7 +178,7 @@ export function buildingViolationHistory(ctx: Ctx): WebMcpToolDef {
     execute: async (input) => {
       const bbl = String(input.bbl ?? "").trim();
       if (!bbl) throw new Error("bbl is required.");
-      const record = getBuildingRecord(bbl);
+      const record = await apiGetBuildingRecord(bbl);
       if (!record) {
         throw new Error(`No violation record for BBL ${bbl}. Try lookup_building first to confirm the BBL.`);
       }
@@ -157,7 +198,7 @@ export function compareToBlock(ctx: Ctx): WebMcpToolDef {
     execute: async (input) => {
       const bbl = String(input.bbl ?? "").trim();
       if (!bbl) throw new Error("bbl is required.");
-      const result = indexCompareToBlock(bbl);
+      const result = await apiCompareToBlock(bbl);
       if (!result) throw new Error(`No block comparison available for BBL ${bbl}.`);
       return result;
     },
@@ -175,7 +216,7 @@ export function matchConditionToCode(ctx: Ctx): WebMcpToolDef {
     execute: async (input) => {
       const text = String(input.text ?? "").trim();
       if (!text) throw new Error("text is required.");
-      const matches = indexMatchConditionToCode(text);
+      const matches = await apiMatchConditionToCode(text);
       return {
         matches,
         count: matches.length,
@@ -242,7 +283,7 @@ export function buildTimeline(ctx: Ctx): WebMcpToolDef {
         }
       }
 
-      const record = getBuildingRecord(caseState.bbl);
+      const record = await apiGetBuildingRecord(caseState.bbl);
       if (record) {
         for (const v of record.violations.filter((v) => v.status === "open")) {
           rows.push({
@@ -482,7 +523,7 @@ export function assembleHpActionPacket(ctx: Ctx): WebMcpToolDef {
     annotations: WRITE,
     execute: async (input, options) => {
       const caseState = requireCase(ctx.caseState, "assemble_hp_action_packet");
-      const record = getBuildingRecord(caseState.bbl);
+      const record = await apiGetBuildingRecord(caseState.bbl);
 
       const partiesBody = record?.building.registration
         ? `Owner: ${record.building.registration.ownerName}. Portfolio: ${record.building.registration.portfolioBuildings} buildings registered to this owner. Building: ${caseState.address}.`
@@ -491,15 +532,17 @@ export function assembleHpActionPacket(ctx: Ctx): WebMcpToolDef {
       const conditionsBody =
         caseState.conditions.length === 0
           ? "No conditions logged yet."
-          : caseState.conditions
-              .map((c) => {
-                const matches = indexMatchConditionToCode(`${c.type} ${c.note}`);
-                const section = c.codeSection ?? matches[0]?.section;
-                return `${c.at}: ${c.type}${c.reading ? ` (${c.reading})` : ""}${section ? ` [${section}]` : ""}: ${c.note}`;
-              })
-              .join("\n");
+          : (
+              await Promise.all(
+                caseState.conditions.map(async (c) => {
+                  const matches = await apiMatchConditionToCode(`${c.type} ${c.note}`);
+                  const section = c.codeSection ?? matches[0]?.section;
+                  return `${c.at}: ${c.type}${c.reading ? ` (${c.reading})` : ""}${section ? ` [${section}]` : ""}: ${c.note}`;
+                }),
+              )
+            ).join("\n");
 
-      const block = indexCompareToBlock(caseState.bbl);
+      const block = await apiCompareToBlock(caseState.bbl);
       const buildingBody = record
         ? `Open class C: ${record.openClassC}. Open class B: ${record.openClassB}. Open class A: ${record.openClassA}. Oldest open violation: ${record.oldestOpenDays} days.${block ? ` Block median open class C: ${block.blockMedian} (this building: ${block.building}, ${block.blockCount} buildings on block).` : ""}`
         : "Building record not available in the index yet.";
