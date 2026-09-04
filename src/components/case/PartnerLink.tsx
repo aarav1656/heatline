@@ -3,16 +3,16 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 
-/** Owner only: the URL that opens this case in the partner's session. */
+/** Tenant only: the URL that opens this case in the advocate's session. */
 export function PartnerLink({ caseId, partnerKey }: { caseId: string; partnerKey?: string }) {
   const [copied, setCopied] = useState(false);
 
   if (!partnerKey) {
     return (
       <section className="border border-hair-strong bg-paper">
-        <h2 className="colhead border-b border-hair bg-paper-sunk px-3 py-1.5">partner link</h2>
+        <h2 className="colhead border-b border-hair bg-paper-sunk px-3 py-1.5">advocate link</h2>
         <p className="px-3 py-2.5 text-[0.75rem] leading-snug text-ink-soft">
-          The partner key for this case is not available in this session.
+          The advocate key for this case is not available in this session.
         </p>
       </section>
     );
@@ -23,7 +23,7 @@ export function PartnerLink({ caseId, partnerKey }: { caseId: string; partnerKey
 
   return (
     <section className="border border-hair-strong bg-paper">
-      <h2 className="colhead border-b border-hair bg-paper-sunk px-3 py-1.5">partner link</h2>
+      <h2 className="colhead border-b border-hair bg-paper-sunk px-3 py-1.5">advocate link</h2>
       <div className="flex flex-wrap items-center gap-2 px-3 py-2.5">
         <code className="code min-w-0 flex-1 break-all text-[0.6875rem] text-ink-soft">{href}</code>
         <Button
@@ -48,9 +48,9 @@ export function PartnerLink({ caseId, partnerKey }: { caseId: string; partnerKey
         </a>
       </div>
       <p className="border-t border-hair px-3 py-2 text-[0.75rem] leading-snug text-ink-soft">
-        Whoever opens this gets the partner session. Their agent can propose a change, the
-        accept tool is never registered in that window, and the server rejects an accept from a
-        partner even if one is forged.
+        Whoever opens this gets the advocate session. Their agent can assemble the HP Action
+        packet and request evidence; the file_packet and log_condition tools are never registered
+        in that window, and the server rejects those actions from an advocate even if forged.
       </p>
     </section>
   );

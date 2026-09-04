@@ -7,7 +7,7 @@ export default function CaseNotFound() {
       <h1 className="plate mt-2 text-[clamp(1.75rem,5vw,2.75rem)]">No case at this link</h1>
       <p className="mt-4 max-w-prose text-[1rem] leading-snug">
         That case id is not in the store. A case lives in the shared state store, not in the URL,
-        so a partner link only works while the case it points at exists.
+        so an advocate link only works while the case it points at exists.
       </p>
       <Link
         href="/"
