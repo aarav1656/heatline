@@ -44,6 +44,11 @@ The same instinct runs through the rest. The tenant types "no heat again, 52 deg
 
 Every number on the page carries the SODA URL that produced it. Paste the URL and you get the same 102.
 
+
+![Architecture](https://raw.githubusercontent.com/aarav1656/heatline/main/video/diagrams/architecture.png)
+
+*Four NYC Open Data feeds become one per-building index, the page registers a different tool set per link, and the server re-checks the role before any write lands.*
+
 ## The loop the two agents run
 
 The advocate's agent asks for a photo of the thermostat at 7am tomorrow. That request lands in the tenant's window over a live stream, no reload. The tenant's agent answers. The advocate's agent then calls `assemble_hp_action_packet`, which writes five sections from the case plus the city record: parties (owner name and portfolio size from the HPD registration), conditions with code sections, the building record with a block comparison, a timeline, relief sought. It saves a draft. In the tenant's window, `file_packet`'s description now says "one draft packet waiting"; the agent calls it, a person presses Confirm, the packet is filed.
@@ -51,6 +56,11 @@ The advocate's agent asks for a photo of the thermostat at 7am tomorrow. That re
 The 311 complaint is a real `<form toolname="draft_311_complaint">` with `toolparamdescription` on each field and deliberately no `toolautosubmit`. The agent fills it. Only a human can press Send.
 
 You cannot do this with a chatbot wrapper or by scraping the page. Nothing else knows which window is asking.
+
+
+![Two sessions, one page](https://raw.githubusercontent.com/aarav1656/heatline/main/video/diagrams/two-sessions.png)
+
+*The tenant's window and the advocate's window on the same case. The gate in the middle is the server, not the tool list.*
 
 ## The parts that are not glamorous
 
@@ -60,11 +70,9 @@ Fourteen tools. `untrustedContentHint` on `list_conditions` and `build_timeline`
 
 Seventeen eval fixtures. The negative ones assert the denied tool is absent from that session's `toolsForRole`, so "just file it for them" from the advocate expects zero calls. 125 tests. Read tools fetch through `/api/building/*` so the 1.3 MB index stays server-side; importing it into the client broke the production build on day one, and that fix is in the history too.
 
-The index covers 40 buildings in zip 10467, the Bronx zip with the most open class C heat violations, 6,077 rows. The build script and every query URL are in the repo. Everything here was written on 4 September 2026.
+The index covers 40 buildings in zip 10467, the Bronx zip with the most open class C heat violations, 6,077 rows. The build script and every query URL are in the repo.
 
-## Built with
-
-Next.js 16, React 19, TypeScript, Tailwind CSS 4, WebMCP (`document.modelContext`), `@mcp-b/webmcp-polyfill`, Server-Sent Events, Vercel, Upstash Redis, Vitest, NYC Open Data via Socrata SODA (HPD violations `wvxf-dwi5`, complaints `uwyv-629c`, complaint problems `a2nx-4u46`, 311 `erm2-nwe9`, HPD registrations `tesw-yqqr` and `feu5-w2e2`).
+Everything here was written on 4 September 2026 with Next.js 16, TypeScript, Tailwind 4, Upstash Redis, Vitest and NYC Open Data. The build script, every SODA query URL and the eval fixtures are in the repo.
 
 ---
 
