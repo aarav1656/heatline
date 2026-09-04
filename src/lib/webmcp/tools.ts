@@ -172,12 +172,12 @@ export function buildingViolationHistory(ctx: Ctx): WebMcpToolDef {
     name: "building_violation_history",
     title: "Get a building's violation record",
     description:
-      "Get the HPD violation record for one building by BBL: open class A/B/C counts, oldest open violation in days, and the individual violations (open first, newest first). Call lookup_building first if you only have an address.",
-    inputSchema: schema({ bbl: str("The building's 10-digit BBL.", { minLength: 1 }) }, ["bbl"]),
+      `Get the HPD violation record for one building: open class A/B/C counts, oldest open violation in days, and the individual violations (open first, newest first). With no bbl it uses this case's building${ctx.caseState ? ` (${ctx.caseState.address}, BBL ${ctx.caseState.bbl})` : ""}. Pass a bbl only to look at a different building; call lookup_building first if you only have an address.`,
+    inputSchema: schema({ bbl: str("Optional 10-digit BBL. Omit to use this case's building.") }),
     annotations: READ,
     execute: async (input) => {
-      const bbl = String(input.bbl ?? "").trim();
-      if (!bbl) throw new Error("bbl is required.");
+      const bbl = String(input.bbl ?? ctx.caseState?.bbl ?? "").trim();
+      if (!bbl) throw new Error("bbl is required when no case is open.");
       const record = await apiGetBuildingRecord(bbl);
       if (!record) {
         throw new Error(`No violation record for BBL ${bbl}. Try lookup_building first to confirm the BBL.`);
@@ -192,12 +192,12 @@ export function compareToBlock(ctx: Ctx): WebMcpToolDef {
     name: "compare_to_block",
     title: "Compare a building to its block",
     description:
-      "Compare a building's open class C violation count to the median for other buildings on the same block. Use this to show the building is an outlier, not just a single bad case.",
-    inputSchema: schema({ bbl: str("The building's 10-digit BBL.", { minLength: 1 }) }, ["bbl"]),
+      "Compare a building's open class C violation count to the median for other buildings on the same block. With no bbl it uses this case's building. Use this to show the building is an outlier, not just a single bad case.",
+    inputSchema: schema({ bbl: str("Optional 10-digit BBL. Omit to use this case's building.") }),
     annotations: READ,
     execute: async (input) => {
-      const bbl = String(input.bbl ?? "").trim();
-      if (!bbl) throw new Error("bbl is required.");
+      const bbl = String(input.bbl ?? ctx.caseState?.bbl ?? "").trim();
+      if (!bbl) throw new Error("bbl is required when no case is open.");
       const result = await apiCompareToBlock(bbl);
       if (!result) throw new Error(`No block comparison available for BBL ${bbl}.`);
       return result;
