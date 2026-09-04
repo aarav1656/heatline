@@ -18,7 +18,7 @@ export async function generateMetadata({ params, searchParams }: PageProps<"/c/[
   const { caseId } = await params;
   const sp = await searchParams;
   const caseState = await getCase(caseId);
-  if (!caseState) return { title: "webmcp-two-agent-spine: no case at this link" };
+  if (!caseState) return { title: "Order to Correct: no case at this link" };
   const view = roleForKey(caseState, keyFrom(sp)) ?? "invalid link";
   return {
     title: `${caseState.title}, ${view} view`,

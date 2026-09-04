@@ -3,9 +3,9 @@ import type { ButtonHTMLAttributes } from "react";
 type Variant = "primary" | "solid" | "outline" | "danger";
 
 /**
- * Signage buttons: a rectangular plate with a hairline, no gradient, no shadow.
- * `primary` is the one accent (MTA blue). `solid` is ink, for the destructive-free
- * commitments the owner makes. Press is a 3% squeeze, nothing else moves.
+ * Docket buttons: a rectangular plate with a hairline, no gradient, no shadow.
+ * `primary` is the one accent (civic red-brown). `solid` is ink, for the destructive-free
+ * commitments the tenant makes. Press is a 3% squeeze, nothing else moves.
  */
 const VARIANTS: Record<Variant, string> = {
   primary:
