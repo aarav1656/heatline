@@ -79,7 +79,7 @@ code, built by `scripts/build-index.ts` into `data/index.json` (read `INDEX_META
 - **HPD Registrations** (`tesw-yqqr`): the owner name and how many other buildings they own.
 
 The demo building is whichever BBL in the worst zip has the most open class C violations. See
-`docs/BUILD-CONTRACT.md` for the exact query shapes.
+`scripts/build-index.ts` for the exact query shapes, and `data/index-meta.json` for every SODA URL the build ran.
 
 ## Local run
 
