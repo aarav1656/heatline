@@ -53,13 +53,25 @@ Advocate (partner) tools: same six reads, plus `assemble_hp_action_packet` (writ
 No more `items`/`proposals`/`reports`. Packet has `sections: {heading, body}[]` and
 `status: "draft" | "filed"`. EvidenceRequest has `answer?`/`answeredAt?` once answered.
 
-## Known gap
+## Fixed: tools.ts no longer imports @/lib/index directly (blocked next build)
 
-`src/lib/index/index.ts` and `data/index.json` are the data agent's build output. Until
-`npx tsx scripts/build-index.ts` has run, `data/index.json` does not exist and `lookupBuilding`/
-`getBuildingRecord` throw. The two `/api/building*` routes catch that and return 503 with a
-clear message; `createCase` degrades gracefully (falls back to the bbl as the address). The
-WebMCP read tools (`lookup_building`, `building_violation_history`, `compare_to_block`,
-`match_condition_to_code`) do not catch it, so an agent calling them before the index is built
-gets a raw throw surfaced as the tool's error message, not a 503, which is the correct behaviour
-for a tool (the model sees an actionable error either way).
+`tools.ts` (client-reachable via `WebMCPTools.tsx`) now fetches `/api/building`,
+`/api/building/[bbl]`, the new `/api/building/[bbl]/compare`, and the new `/api/code/match`
+instead of calling `lookupBuilding`/`getBuildingRecord`/`compareToBlock`/`matchConditionToCode`
+directly. Only types are imported from `@/lib/index` now. Verified `rm -rf .next && npx next
+build` exits 0 with no `node:fs` chunking error; `npx vitest run` still 110/110.
+
+## Fixed: action route TYPES array
+
+Already matched the real `CaseActionType` union as of the first commit (b9f6599); the report of
+it still listing `add_item`/`propose_change`/etc was against a stale checkout. Current file
+correctly lists `log_condition | request_evidence | answer_evidence | assemble_packet |
+file_packet | add_note | draft_311`.
+
+## Known gap (resolved)
+
+`data/index.json` has now been built by the data agent, so this no longer applies day-to-day:
+`lookupBuilding`/`getBuildingRecord` no longer throw. The `/api/building*` routes still 503
+gracefully if the file is ever missing again (e.g. a fresh clone before running the build
+script), and the WebMCP read tools now go through those routes (see the fix above), so they get
+that same 503 surfaced as a tool error rather than a raw throw.
