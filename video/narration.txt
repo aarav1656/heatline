@@ -1,0 +1,13 @@
+Hi, I'm Kamal. This is a story about an apartment that held fifty-two degrees at seven in the morning, eleven mornings in a row.
+The tenant's landlord stopped answering in January. What the tenant didn't know is that the city already had a file on the building: two thousand three fifteen Barnes Avenue in the Bronx, one hundred and two open class C violations, the oldest open for six hundred and one days.
+Order to Correct is a shared case page for a tenant and a legal aid advocate. Each of them gets their own agent, on the same page, with different tools.
+The data is New York's own housing enforcement record: HPD violations, complaints, three one one heat calls, and owner registrations, pulled by SODA query with the exact URL kept beside every number.
+Here is the tenant's window. The agent calls building violation history with no arguments and reads the record straight off the case. One hundred and two open class C. Six hundred and one days.
+The tenant says: no heat again, fifty-two degrees at seven. Match condition to code returns section twenty-seven twenty-twenty-nine, the heat rule, sixty-eight degrees from six in the morning to ten at night. Log condition fires. A card asks the tenant to confirm. A person clicks it, not the agent.
+Now the advocate's window, same case. Open DevTools, Application, WebMCP. Nine tools. Assemble HP action packet and request evidence are here. File packet and log condition are not. The server checks the same thing on every write, so a forged call gets a four oh three.
+The advocate's agent asks the tenant for a photo of the thermostat. It lands in the tenant's window without a reload.
+Then it assembles the packet: parties from the registration, conditions with their code sections, the building record, the timeline, relief sought. Confirm.
+Back in the tenant's window, the agent calls file packet. One draft waiting. Confirm. Filed.
+Last, the three one one complaint. It's a declarative WebMCP form. The agent fills every field. Only a human presses Send.
+No chatbot wrapper can do this, because nothing else knows which window is asking. The page declares its own tools, the roles are capability keys, and every write goes through a person.
+The city's own record was always public. Now the tenant's agent can read it, and the advocate's agent can build the case from it. That's Order to Correct.
