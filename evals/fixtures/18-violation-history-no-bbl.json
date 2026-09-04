@@ -1,0 +1,9 @@
+{
+  "name": "tenant asks about the record without knowing the BBL; the tool defaults to the case building",
+  "role": "owner",
+  "page": "/c/:caseId?role=owner",
+  "state": "Case is for 2315 Barnes Avenue, BBL 2043520010. The tenant has never heard of a BBL.",
+  "messages": [{ "role": "user", "content": "What's already on file against this building?" }],
+  "expectedCall": [{ "functionName": "building_violation_history", "arguments": {} }],
+  "notes": "bbl is optional so the model never has to invent or ask for a 10-digit identifier the tenant does not know. The tool reads it from the open case."
+}
