@@ -1,6 +1,6 @@
 ---
 version: alpha
-name: Order-to-Correct-design-system
+name: Heatline-design-system
 description: A housing-court docket printed by a broadsheet, not a paper case register. Stark white canvas, black ink, a tall condensed serif display for the address and record numbers, hairline rules between panels, numbered packet sections (I., II., III.), dateline-style mono timestamps, all-caps tracked labels for panel headings. One civic red accent for the primary action and focus ring. Zero shadows, zero gradients, square corners throughout.
 structure_source: "Structure adapted from docs/DESIGN-SOURCE-wired.md (Wired: white canvas, black ink, tall condensed serif display, hairline rules, editorial column rhythm, one link blue). Branding not copied: no Wired wordmark, no proprietary fonts. Fallback stack only."
 research_source: "Colour, tier, and type reasoning carried over and re-derived from the prior paper/Archivo revision of this file; contrast ratios below are freshly computed against the new white canvas, not copied."
@@ -201,7 +201,7 @@ components:
 
 ## Overview
 
-Order to Correct reads like a legal docket printed by a broadsheet newspaper, not a courthouse
+Heatline reads like a legal docket printed by a broadsheet newspaper, not a courthouse
 bulletin board and not a SaaS dashboard. The canvas is pure `{colors.canvas}` (#FFFFFF); ink is
 pure `{colors.ink}` (#000000). The address and building record numbers are set in a tall
 condensed serif display face, the way a broadsheet sets its section heads. Panels are separated
@@ -276,7 +276,7 @@ class, so counts never jitter in width as they update.
 
 | Token | Size | Weight | Line Height | Tracking | Use |
 |---|---|---|---|---|---|
-| `{typography.display-hero}` | 56px | 700 | 56px | -0.5px | Site masthead ("Order to Correct") on the home page |
+| `{typography.display-hero}` | 56px | 700 | 56px | -0.5px | Site masthead ("Heatline") on the home page |
 | `{typography.display-lg}` | 48px | 700 | 48px | -0.4px | Building record numeral, case address hero |
 | `{typography.display-md}` | 32px | 700 | 34px | -0.3px | Section headline inside a panel |
 | `{typography.display-sm}` | 24px | 700 | 27px | -0.2px | Role band headline ("You are the advocate") |

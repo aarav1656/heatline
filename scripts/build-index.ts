@@ -39,7 +39,7 @@ const WINTER_COUNT = 3;
 async function fetchJson<T>(url: string, label: string): Promise<T> {
   for (let attempt = 0; attempt < 3; attempt++) {
     const res = await fetch(url, {
-      headers: { "User-Agent": "order-to-correct-index-builder/1.0" },
+      headers: { "User-Agent": "heatline-index-builder/1.0" },
     });
     if (res.ok) return (await res.json()) as T;
     if (res.status === 429 || res.status >= 500) {

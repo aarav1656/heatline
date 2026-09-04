@@ -1,4 +1,4 @@
-# Order to Correct
+# Heatline
 
 A tenant at 52F at 7am for eleven mornings. The landlord has been silent since January. The
 building, 2315 Barnes Avenue in the Bronx, already carries 102 open class C ("immediately
@@ -14,7 +14,7 @@ After: one `building_violation_history` call returns the record with counts, old
 owner and portfolio size, and `match_condition_to_code` names the section from the tenant's own
 words; the packet's five sections assemble from that in one confirmed call. Estimate, not measured.
 
-Order to Correct is one shared case page for a tenant and their legal-aid advocate, each with a
+Heatline is one shared case page for a tenant and their legal-aid advocate, each with a
 different WebMCP tool set on the same origin. The tenant's agent logs conditions as they happen,
 matches them to the Housing Maintenance Code, drafts the 311 complaint, and files the finished
 packet. The advocate's agent pulls the building's enforcement history from NYC Open Data, assembles

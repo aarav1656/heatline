@@ -2,7 +2,7 @@
   "schema_version": 2,
   "diagram_type": "workflow",
   "meta": {
-    "title": "Order to Correct: two sessions on one case",
+    "title": "Heatline: two sessions on one case",
     "quality_profile": "showcase",
     "visual_preset": "editorial",
     "output": "two-sessions.html"

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { CreateCase } from "@/components/case/CreateCase";
 
 export const metadata: Metadata = {
-  title: "Order to Correct",
+  title: "Heatline",
 };
 
 export default function Home() {
@@ -10,7 +10,7 @@ export default function Home() {
     <main className="mx-auto w-full max-w-[1120px] px-4 pb-24 sm:px-8">
       <header className="border-b-2 border-ink pb-6 pt-8">
         <div className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-2">
-          <h1 className="plate text-[clamp(2.25rem,5vw,3.5rem)] text-balance">Order to Correct</h1>
+          <h1 className="plate text-[clamp(2.25rem,5vw,3.5rem)] text-balance">Heatline</h1>
           <p className="colhead">tenant · advocate · one case</p>
         </div>
         <p className="mt-3 max-w-xl text-[1.0625rem] leading-snug text-pretty">

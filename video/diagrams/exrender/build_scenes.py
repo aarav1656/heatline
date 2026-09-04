@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate the three .excalidraw scenes for the Order to Correct demo video.
+"""Generate the three .excalidraw scenes for the Heatline demo video.
 Palette from DESIGN.md. A transparent 1920x1080 frame element makes the export
 bbox exactly 16:9 so exportToBlob at 1920x1080 scale 1 is pixel-for-pixel."""
 import json, random, sys, os
@@ -138,7 +138,7 @@ def scene_pipeline():
 def scene_two():
     el=[frame(),eyebrow("ORDER TO CORRECT  /  TWO AGENTS, ONE CASE")]
     el.append(rect(560,102,800,66,stroke=HAIR,strokeWidth=2))
-    el.append(text("order-to-correct.vercel.app / case / <id>",960,120,26,INK))
+    el.append(text("heatline-nyc.vercel.app / case / <id>",960,120,26,INK))
     def window(x,title,sub,tools,gone,cx,color):
         o=[rect(x,232,700,556,stroke=INK,strokeWidth=3)]
         o.append(line(x,314,x+700,314,stroke=INK,strokeWidth=2))
@@ -178,7 +178,7 @@ def main():
     for name,fn in SCENES.items():
         _n[0]=0
         scene={"type":"excalidraw","version":2,
-          "source":"order-to-correct/docs/diagrams/build_scenes.py",
+          "source":"heatline/docs/diagrams/build_scenes.py",
           "elements":fn(),
           "appState":{"gridSize":None,"viewBackgroundColor":PAPER,"exportBackground":True,
             "exportWithDarkMode":False,"exportEmbedScene":False,"exportScale":1},

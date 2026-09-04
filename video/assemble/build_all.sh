@@ -13,7 +13,7 @@ VIDEO_DIR="$(dirname "$SELF_DIR")"
 TIMELINE="$SELF_DIR/timeline.tsv"
 SEG_DIR="$SELF_DIR/segments"
 OUT_DIR="$VIDEO_DIR/out"
-OUT="$OUT_DIR/order-to-correct-demo.mp4"
+OUT="$OUT_DIR/heatline-demo.mp4"
 
 FFMPEG=/opt/homebrew/opt/ffmpeg-full/bin/ffmpeg
 FFPROBE=/opt/homebrew/opt/ffmpeg-full/bin/ffprobe
