@@ -174,7 +174,7 @@ export function CaseView() {
       <div className="mx-auto w-full max-w-[1360px] px-4 pb-24 sm:px-8">
         <header className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-2 border-b border-ink py-3">
           <Link href="/" className="plate text-[1.0625rem] hover:text-accent">
-            Order to Correct
+            Heatline
           </Link>
           <div className="flex flex-wrap items-center gap-4">
             <StreamDot state={stream} />

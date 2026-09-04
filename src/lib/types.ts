@@ -1,5 +1,5 @@
 /**
- * The whole domain model for Order to Correct: a Case shared by a tenant (Role "owner") and a
+ * The whole domain model for Heatline: a Case shared by a tenant (Role "owner") and a
  * legal-aid advocate (Role "partner") on one NYC building. Everything in src/lib/webmcp and
  * src/lib/store/backend.ts is domain-agnostic and does not change; this file and
  * src/lib/store/actions.ts are the two files a domain fork rewrites.

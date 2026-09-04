@@ -28,7 +28,7 @@ const plexMono = IBM_Plex_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Order to Correct",
+    default: "Heatline",
     template: "%s",
   },
   description:

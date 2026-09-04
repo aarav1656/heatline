@@ -1,4 +1,4 @@
-// The Data layer API for Order to Correct. Reads data/index.json (built by
+// The Data layer API for Heatline. Reads data/index.json (built by
 // scripts/build-index.ts) and exposes the exact surface documented in
 // docs/BUILD-CONTRACT.md. No network calls at runtime, this module is pure reads
 // and pure functions over the built index.

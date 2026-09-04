@@ -6,7 +6,7 @@ Paste-ready. Field names match the Devpost submission form for The WebMCP Challe
 
 ## Project name
 
-Order to Correct
+Heatline
 
 ## Tagline (under 100 characters)
 
@@ -16,8 +16,8 @@ A tenant and a legal-aid advocate each get an agent on one NYC building's own en
 
 ## Links
 
-- Live: https://order-to-correct-psi.vercel.app
-- Repo: https://github.com/aarav1656/order-to-correct (MIT)
+- Live: https://heatline-nyc.vercel.app
+- Repo: https://github.com/aarav1656/heatline (MIT)
 - Video: (YouTube link added after upload)
 
 ---
@@ -61,7 +61,7 @@ cannot file, even by forging the call. The 311 complaint is a declarative form: 
 every field, only a human presses Send. None of this works with DOM scraping or a shared login.
 
 Context: HPD's own enforcement data (violations dataset wvxf-dwi5, complaints uwyv-629c, 311
-erm2-nwe9, registrations tesw-yqqr and feu5-w2e2) is public and keyless. "Order to Correct" is the
+erm2-nwe9, registrations tesw-yqqr and feu5-w2e2) is public and keyless. "Heatline" is the
 name of the notice HPD itself issues. The index behind this entry covers 40 buildings in Bronx zip
 10467 with 6,077 violations, chosen because it is the zip with the most open class C heat
 violations in the borough; the build script and every query are in the repo.
@@ -101,7 +101,7 @@ registrations).
 ## Testing instructions (submission field)
 
 No login, no API key, no setup. Chrome 149 or later with WebMCP turned on at
-`chrome://flags/#enable-webmcp-testing`. Open https://order-to-correct-psi.vercel.app.
+`chrome://flags/#enable-webmcp-testing`. Open https://heatline-nyc.vercel.app.
 
 1. **Create the demo case.** Search "Barnes" and pick 2315 Barnes Avenue (BBL 2043520010, 102 open
    class C). Apartment 4C, condition heat, reading "52F at 7am". Create. You are the tenant.
