@@ -14,7 +14,7 @@ const VARIANTS: Record<Variant, string> = {
   outline:
     "bg-paper text-ink border-hair-strong hover:border-ink hover:bg-paper-sunk",
   danger:
-    "bg-paper text-tier-unreliable border-hair-strong hover:border-tier-unreliable hover:bg-tier-unreliable hover:text-paper",
+    "bg-paper text-tier-out border-hair-strong hover:border-tier-out hover:bg-tier-out hover:text-paper",
 };
 
 export function Button({

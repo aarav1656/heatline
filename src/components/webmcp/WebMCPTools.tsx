@@ -7,7 +7,7 @@ import { subscribeToolLog, getToolLog, whenToolsIdle, type ToolLogEntry } from "
 import { registerTools, type RegisteredInfo, type RegistrationTarget } from "@/lib/webmcp/register";
 import { ensureModelContext, type WebMcpLayer } from "@/lib/webmcp/runtime";
 import { ConfirmCard } from "@/components/webmcp/ConfirmCard";
-import { ReportForm } from "@/components/webmcp/ReportForm";
+import { Report311Form } from "@/components/webmcp/Report311Form";
 
 /**
  * `@mcp-b/webmcp-types` types `execute` as `(input) => ...` because that is what the polyfill
@@ -31,7 +31,7 @@ export type WebMCPToolsProps = {
   headless?: boolean;
   /**
    * Render the declarative report_form here. Owner sessions only.
-   * Set false and mount <ReportForm> yourself to place it elsewhere on the page.
+   * Set false and mount <Report311Form> yourself to place it elsewhere on the page.
    */
   reportForm?: boolean;
 };
@@ -85,7 +85,8 @@ export function WebMCPTools({
   // The things that must change the registered tool set (and therefore fire toolchange).
   const caseId = caseState?.id ?? null;
   const version = caseState?.version ?? -1;
-  const pendingCount = (caseState?.proposals ?? []).filter((p) => p.status === "pending").length;
+  const openEvidenceCount = (caseState?.evidenceRequests ?? []).filter((r) => r.status === "open").length;
+  const draftPacketCount = (caseState?.packets ?? []).filter((p) => p.status === "draft").length;
 
   useEffect(() => {
     if (!context) return;
@@ -114,7 +115,7 @@ export function WebMCPTools({
         controller.abort();
       });
     };
-  }, [context, role, caseId, version, pendingCount]);
+  }, [context, role, caseId, version, openEvidenceCount, draftPacketCount]);
 
   // Mirror what the browser itself reports, so the panel shows declarative form tools too.
   const refreshBrowserTools = useCallback(() => {
@@ -139,7 +140,7 @@ export function WebMCPTools({
   const gate = (
     <>
       <ConfirmCard />
-      {reportForm && role === "owner" && caseState && <ReportForm actions={actions} />}
+      {reportForm && role === "owner" && caseState && <Report311Form actions={actions} />}
     </>
   );
 

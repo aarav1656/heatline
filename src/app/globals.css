@@ -1,12 +1,12 @@
 @import "tailwindcss";
 
 /*
- * Out of Service reads as transit signage on paper, not as a dashboard.
- * Every colour here is a meaning: a subway line, an elevator reliability tier,
- * or the fact that something is out. Nothing is decoration.
+ * Order to Correct reads as a housing court docket / HPD notice register on paper, not as a
+ * dashboard. Every colour here is a meaning: a violation class, a source citation, or the fact
+ * that a packet has been filed. Nothing is decoration.
  *
  * Tokens live in one @theme block. Components reference the semantic name
- * (bg-paper, text-ink, border-hair, text-tier-unreliable), never a raw hex.
+ * (bg-paper, text-ink, border-hair, text-tier-out), never a raw hex.
  */
 
 @theme {
@@ -14,7 +14,7 @@
   --font-sans: ui-sans-serif, system-ui, "Helvetica Neue", Arial, sans-serif;
   --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
-  /* Surface: warm off-white MTA card stock, near-black ink. Never #fff, never #000. */
+  /* Surface: warm off-white case-record paper, near-black ink. Never #fff, never #000. */
   --color-paper: #f2efe9;
   --color-paper-sunk: #ece8dc;
   --color-paper-inset: #e4dfce;
@@ -24,20 +24,17 @@
   --color-hair: #ddd8c8;
   --color-hair-strong: #b8b29c;
 
-  /* One accent: MTA signage blue. Interactive only, never body text.
-     MTA orange (#FF6319) is the B/D/F/M bullet and nothing else. */
-  --color-accent: #0039a6;
-  --color-accent-soft: #dce6f5;
-  --color-accent-ink: #002a7a;
+  /* One accent: civic red-brown, the colour of a filing seal. Interactive only, never body text. */
+  --color-accent: #8b2500;
+  --color-accent-soft: #f1dcd3;
+  --color-accent-ink: #6b1c00;
 
-  /* Reliability tiers, all AA on the surface (docs/DESIGN.md contrast table). */
+  /* Violation-class tiers, all AA on the surface (see DESIGN.md contrast table). */
   --color-tier-reliable: #0c6b3d;
   --color-tier-watch: #8a5a00;
-  --color-tier-unreliable: #a6360f;
   --color-tier-out: #7a1010;
-  --color-tier-unknown: #4a4a46;
 
-  /* A simulated outage is never mistaken for a real one. */
+  /* A simulated demo control is never mistaken for a real one. */
   --color-sim: #6c2bd9;
 
   /* Square corners on panels and chips; 2px only on things you type in or press. */
@@ -71,7 +68,7 @@ body {
     font-feature-settings: "tnum" 1;
   }
 
-  /* Station names and route ids: the condensed, tight setting of a platform sign. */
+  /* Case titles and addresses: the condensed, tight setting of a docket header. */
   .plate {
     font-stretch: 88%;
     letter-spacing: -0.02em;
@@ -79,14 +76,14 @@ body {
     line-height: 1.02;
   }
 
-  /* Equipment codes and times: a maintenance tag, not body copy. */
+  /* Case ids, code sections and timestamps: a filed-notice stamp, not body copy. */
   .code {
     font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;
     letter-spacing: 0.01em;
   }
 
-  /* A column heading on a status board. Used sparingly, never stacked on an h2. */
+  /* A column heading on a register page. Used sparingly, never stacked on an h2. */
   .colhead {
     font-size: 0.6875rem;
     font-weight: 600;
@@ -101,7 +98,7 @@ body {
     outline-offset: 2px;
   }
 
-  /* Native listbox styled as a departure board rather than an OS widget. */
+  /* Native listbox styled as a register page rather than an OS widget. */
   select[size] option {
     padding: 5px 8px;
     color: var(--color-ink);
@@ -113,7 +110,7 @@ body {
   }
 }
 
-/* A route whose elevator is out is hatched like a closed entrance, not glowing red. */
+/* A class C condition is hatched like a stop-work order, not glowing red. */
 .hatched {
   background-image: repeating-linear-gradient(
     -45deg,
@@ -122,7 +119,7 @@ body {
   );
 }
 
-/* Provenance: a dotted value you can click or tab to for the query behind it. */
+/* Provenance: a dotted value you can click or tab to for the SODA query behind it. */
 .sourced > summary {
   cursor: help;
   list-style: none;
