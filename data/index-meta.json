@@ -1,0 +1,12 @@
+{
+  "builtAt": "2026-09-04T04:07:02.256Z",
+  "buildings": 40,
+  "violations": 6077,
+  "demoBbl": "2043520010",
+  "zip": "10467",
+  "sources": [
+    "https://data.cityofnewyork.us/resource/wvxf-dwi5.json?%24select=zip%2Ccount(violationid)%20as%20cnt&%24where=boro%3D'BRONX'%20AND%20class%3D'C'%20AND%20violationstatus%3D'Open'%20AND%20upper(novdescription)%20like%20'%25HEAT%25'&%24group=zip&%24order=cnt%20DESC&%24limit=10",
+    "https://data.cityofnewyork.us/resource/wvxf-dwi5.json?%24select=boro%2Cblock%2Clot%2Ccount(violationid)%20as%20cnt&%24where=boro%3D'BRONX'%20AND%20zip%3D'10467'%20AND%20class%3D'C'%20AND%20violationstatus%3D'Open'%20AND%20upper(novdescription)%20like%20'%25HEAT%25'&%24group=boro%2Cblock%2Clot&%24order=cnt%20DESC&%24limit=40",
+    "https://data.cityofnewyork.us/resource/wvxf-dwi5.json?%24select=violationid%2Cclass%2Ccurrentstatus%2Cviolationstatus%2Cinspectiondate%2Ccurrentstatusdate%2Cnovdescription%2Cordernumber%2Capartment%2Chousenumber%2Cstreetname%2Cboro%2Czip%2Cbuildingid&%24where=boro%3D'BRONX'%20AND%20block%3D'4341'%20AND%20lot%3D'75'&%24order=violationstatus%20DESC%2Cinspectiondate%20DESC&%24limit=200"
+  ]
+}
