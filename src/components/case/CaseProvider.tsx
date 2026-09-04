@@ -15,10 +15,10 @@ import type { CaseActions } from "@/lib/webmcp/contracts";
 import { unspotlight } from "@/lib/spotlight";
 
 /**
- * The case SSE stream spotlights free text the same way the `get_case` tool does, so any other
- * reader of that endpoint gets the untrusted-content boundary. This page is a trusted first-party
- * human reader, not a model, so it undoes the wrapping before the text ever reaches a component:
- * a person should see their note, not `<untrusted-user-text>` markup around it. `initialCase`
+ * The case SSE stream spotlights free text the same way the read tools do, so any other reader
+ * of that endpoint gets the untrusted-content boundary. This page is a trusted first-party human
+ * reader, not a model, so it undoes the wrapping before the text ever reaches a component: a
+ * person should see their note, not `<untrusted-user-text>` markup around it. `initialCase`
  * (server-rendered, via plain `stripKeys`) never carried the wrapper in the first place;
  * `unspotlight` is a no-op on text that isn't wrapped, so re-applying it here is safe either way.
  */
@@ -26,8 +26,12 @@ function unspotlightCase(caseState: CaseState): CaseState {
   return {
     ...caseState,
     notes: caseState.notes.map((n) => ({ ...n, text: unspotlight(n.text) })),
-    reports: caseState.reports.map((r) => ({ ...r, description: unspotlight(r.description) })),
-    proposals: caseState.proposals.map((p) => ({ ...p, reason: unspotlight(p.reason) })),
+    conditions: caseState.conditions.map((c) => ({ ...c, note: unspotlight(c.note) })),
+    evidenceRequests: caseState.evidenceRequests.map((r) => ({
+      ...r,
+      ask: unspotlight(r.ask),
+      answer: r.answer !== undefined ? unspotlight(r.answer) : undefined,
+    })),
   };
 }
 
@@ -35,7 +39,7 @@ export type CaseContextValue = {
   caseState: CaseState;
   role: Role;
   actions: CaseActions;
-  /** The partner's capability key, known to the owner session only, once. */
+  /** The tenant's one-time view of the advocate's key, known to the owner session only. */
   partnerKey?: string;
   stream: "connecting" | "open" | "closed";
   error: string | null;
@@ -79,7 +83,7 @@ export function CaseProvider({
   role: Role;
   /** This session's own capability key (the `?k=` it opened with). Sent with every action. */
   sessionKey: string;
-  /** The owner session's one-time view of the partner's key, for PartnerLink and share_case. */
+  /** The tenant session's one-time view of the advocate's key, for PartnerLink and share_case. */
   partnerKey?: string;
   initialCase: CaseState;
   children: ReactNode;
@@ -96,8 +100,8 @@ export function CaseProvider({
   }, []);
 
   /*
-   * Case SSE: the owner sees the partner's proposal without reloading, in a background tab as
-   * much as a foreground one, so this stream is never dropped while the page is open.
+   * Case SSE: the tenant sees the advocate's evidence request without reloading, in a background
+   * tab as much as a foreground one, so this stream is never dropped while the page is open.
    */
   useEffect(() => {
     let stopped = false;
@@ -170,12 +174,14 @@ export function CaseProvider({
         }
         return { ...body.case, ownerUrl: body.ownerUrl, partnerUrl: body.partnerUrl };
       },
-      addItem: (text) => run("add_item", { text }),
-      proposeChange: (text, reason) => run("propose_change", { text, reason }),
-      acceptChange: (proposalId) => run("accept_change", { proposalId }),
-      rejectChange: (proposalId) => run("accept_change", { proposalId, decision: "reject" }),
+      logCondition: (type, note, reading, codeSection) =>
+        run("log_condition", { type, note, reading, codeSection }),
+      requestEvidence: (ask) => run("request_evidence", { ask }),
+      answerEvidence: (requestId, answer) => run("answer_evidence", { requestId, answer }),
+      assemblePacket: (sections) => run("assemble_packet", { sections }),
+      filePacket: () => run("file_packet", {}),
       addNote: (text) => run("add_note", { text }),
-      report: (subject, description) => run("report", { subject, description }),
+      draft311: (conditionType, description) => run("draft_311", { conditionType, description }),
     }),
     [run],
   );

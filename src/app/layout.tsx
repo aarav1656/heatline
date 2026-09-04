@@ -20,11 +20,11 @@ const plexMono = IBM_Plex_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "webmcp-two-agent-spine",
+    default: "Order to Correct",
     template: "%s",
   },
   description:
-    "Two people, two agents, one WebMCP page: capability-key roles, confirm-before-mutate, shared state, SSE. Template.",
+    "A tenant and a legal-aid advocate share one housing court case, each with a different WebMCP tool set: capability-key roles, confirm-before-mutate, shared state, SSE.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
